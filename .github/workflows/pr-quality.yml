@@ -19,6 +19,19 @@ jobs:
         with:
           max-failures: 4
           allowed-target-branches: master
+          allowed-source-branches: |
+            build/**
+            chore/**
+            ci/**
+            docs/**
+            feat/**
+            fix/**
+            perf/**
+            refactor/**
+            revert/**
+            test/**
+            dependabot/**
+            renovate/**
           blocked-source-branches: |
             main
             master

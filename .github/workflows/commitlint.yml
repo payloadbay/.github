@@ -10,6 +10,28 @@ permissions:
   contents: read
 
 jobs:
+  branch:
+    name: Branch Name
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch name
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          issue_pattern='^(docs|feat|fix|perf|refactor|revert|test)/[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$'
+          maintenance_pattern='^(build|chore|ci)/([0-9]+-)?[a-z0-9]+(-[a-z0-9]+)*$'
+          automation_pattern='^(dependabot|renovate)/.+'
+
+          if [[ "$HEAD_REF" =~ $issue_pattern || "$HEAD_REF" =~ $maintenance_pattern || "$HEAD_REF" =~ $automation_pattern ]]; then
+            exit 0
+          fi
+
+          echo "Invalid branch name: $HEAD_REF"
+          echo "Use <type>/<issue-number>-<short-description> for issue-backed work."
+          echo "Build, chore, and ci branches may omit the issue number."
+          exit 1
+
   commits:
     name: Conventional Commits
     runs-on: ubuntu-latest
