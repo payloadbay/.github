@@ -40,9 +40,11 @@ may label, comment on, or close a pull request that reaches the configured
 failure threshold.
 
 The synchronized files are declared in
-[`.github/repository-baseline.json`](.github/repository-baseline.json). Required
-checks are configured separately in the `baseline:default-branch` ruleset after
-their check contexts have been verified on GitHub.
+[`.github/repository-baseline.json`](.github/repository-baseline.json). The
+`baseline:default-branch` ruleset requires `Anti-Slop`, `Branch Name`,
+`Conventional Commits`, and `Conventional PR Title` before merge.
+Organization administrators have an explicit bypass for recovery and baseline
+maintenance.
 
 ## Renovate
 
