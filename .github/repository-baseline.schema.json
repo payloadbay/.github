@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "organization",
+    "sourceRepository",
+    "sourceBranch",
+    "rulesetPrefix",
+    "statePath",
+    "syncBranch",
+    "excludedRepositories",
+    "managedFiles",
+    "renovate"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "organization": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceRepository": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceBranch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rulesetPrefix": {
+      "type": "string",
+      "minLength": 1
+    },
+    "statePath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "syncBranch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "excludedRepositories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "managedFiles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "renovate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preset", "bootstrapPath", "configPaths"],
+      "properties": {
+        "preset": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bootstrapPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "configPaths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}
