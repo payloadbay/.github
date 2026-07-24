@@ -1,7 +1,12 @@
-name: Pull Request Labeler
+name: Metadata Labeler
 
 on:
   pull_request_target:
+    types:
+      - opened
+      - edited
+      - reopened
+  issues:
     types:
       - opened
       - edited
@@ -10,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
   pull-requests: write
 
 jobs:
@@ -28,7 +34,7 @@ jobs:
           path: .payloadbay-community
           persist-credentials: false
 
-      - name: Synchronize pull request labels
+      - name: Synchronize labels
         uses: srvaroa/labeler@bf262763a8a8e191f5847873aecc0f29df84f957 # v1.14.0
         with:
           config_path: .payloadbay-community/.github/labeler.yml

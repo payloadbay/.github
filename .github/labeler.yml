@@ -89,3 +89,50 @@ labels:
 
   - label: area:ui-ux
     body: '(?m)^- \[[xX]\] UI/UX$'
+
+  # Bug report areas
+  # Compatibility contract with ISSUE_TEMPLATE/bug-report.yml:
+  # These rules match the dropdown option values as exact lines. They do not
+  # depend on the generated field heading. Update and test both files together
+  # whenever an option value is renamed.
+  - label: area:infrastructure
+    body: '(?m)^Installation or deployment\r?$'
+
+  - label: area:auth
+    body: '(?m)^Authentication or authorization\r?$'
+
+  - label: area:ingress
+    body: '(?m)^Ingress or source handling\r?$'
+
+  - label: area:integrations
+    body: '(?m)^Provider integration\r?$'
+
+  - label: area:delivery
+    body: '(?m)^Routing or delivery\r?$'
+
+  - label: area:reliability
+    body: '(?m)^Retries, replay, or recovery\r?$'
+
+  - label: area:runner
+    body: '(?m)^Runner connectivity or delivery\r?$'
+
+  - label: area:ui-ux
+    body: '(?m)^Dashboard or user interface\r?$'
+
+  - label: area:api
+    body: '(?m)^API or SDK\r?$'
+
+  - label: area:sdk
+    body: '(?m)^API or SDK\r?$'
+
+  - label: area:storage
+    body: '(?m)^Storage or database\r?$'
+
+  - label: area:database
+    body: '(?m)^Storage or database\r?$'
+
+  - label: area:observability
+    body: '(?m)^Observability or operations\r?$'
+
+  - label: area:docs
+    body: '(?m)^Documentation content\r?$'
