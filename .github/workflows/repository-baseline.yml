@@ -6,7 +6,8 @@ on:
       - master
     paths:
       - ".github/ISSUE_TEMPLATE/**"
-      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - ".github/pull_request_template.md"
+      - ".github/commitlint.config.mjs"
       - ".github/labeler.yml"
       - ".github/labels.json"
       - ".github/repository-baseline.json"
@@ -14,6 +15,8 @@ on:
       - ".github/scripts/repository-baseline.mjs"
       - ".github/scripts/repository-baseline.test.mjs"
       - ".github/workflows/metadata-labeler.yml"
+      - ".github/workflows/commitlint.yml"
+      - ".github/workflows/pr-quality.yml"
       - ".github/workflows/repository-baseline.yml"
       - "renovate-config.json"
   schedule:
