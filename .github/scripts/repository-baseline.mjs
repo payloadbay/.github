@@ -852,12 +852,15 @@ async function main() {
   for (const repository of repositories) {
     console.log(`\n${owner}/${repository.name}`);
     try {
+      const currentRepository = await api.request(
+        `/repos/${owner}/${repository.name}`,
+      );
       await synchronizeLabels(api, owner, repository.name, desiredLabels);
       const targetBranch = await synchronizeSettings(
         api,
         owner,
         repository.name,
-        repository,
+        currentRepository,
         desiredSettings,
       );
 
