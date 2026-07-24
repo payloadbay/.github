@@ -195,6 +195,16 @@
     "description": "Maintainer override for automated pull request quality checks"
   },
   {
+    "name": "quality:rejected",
+    "color": "b60205",
+    "description": "Rejected by automated pull request quality checks"
+  },
+  {
+    "name": "quality:verified",
+    "color": "0e8a16",
+    "description": "Passed automated pull request quality checks"
+  },
+  {
     "name": "spam",
     "color": "000000",
     "description": "Spam, advertising, or automated abuse"
