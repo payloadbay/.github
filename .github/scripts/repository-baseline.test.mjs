@@ -75,7 +75,13 @@ test("normalizeRuleset injects one synchronization app bypass", () => {
     name: "baseline:default-branch",
     target: "branch",
     enforcement: "active",
-    bypass_actors: [],
+    bypass_actors: [
+      {
+        actor_id: null,
+        actor_type: "OrganizationAdmin",
+        bypass_mode: "always",
+      },
+    ],
     conditions: { ref_name: { include: ["~DEFAULT_BRANCH"], exclude: [] } },
     rules: [{ type: "deletion" }],
   };
@@ -85,6 +91,11 @@ test("normalizeRuleset injects one synchronization app bypass", () => {
     injectAppBypass: true,
   });
   assert.deepEqual(normalized.bypass_actors, [
+    {
+      actor_id: null,
+      actor_type: "OrganizationAdmin",
+      bypass_mode: "always",
+    },
     {
       actor_id: 123,
       actor_type: "Integration",
