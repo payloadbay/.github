@@ -1,6 +1,16 @@
 version: 1
 
 labels:
+  # Feature and improvement request types
+  # Compatibility contract with ISSUE_TEMPLATE/feature-request.yml:
+  # These rules match the dropdown option values as exact lines. Update and
+  # test both files together whenever an option value is renamed.
+  - label: feature
+    body: '(?m)^New product capability\r?$'
+
+  - label: improvement
+    body: '(?m)^Improvement to an existing capability\r?$'
+
   # Pull request types
   - label: bug
     body: '(?m)^- \[[xX]\] 🐛 Bug fix$'
