@@ -54,10 +54,10 @@ repository permissions:
 | Pull requests  | Read and write |
 | Workflows      | Read and write |
 
-Add the App ID as the organization variable
-`PAYLOADBAY_BASELINE_APP_ID`. Add its private key as the organization secret
-`PAYLOADBAY_BASELINE_APP_PRIVATE_KEY`, with access limited to the `.github`
-repository.
+Add the App ID as the `.github` repository variable
+`PAYLOADBAY_BASELINE_APP_ID`. Add its private key as the `.github` repository
+secret `PAYLOADBAY_BASELINE_APP_PRIVATE_KEY`. No other repository needs direct
+access to either value.
 
 The workflow remains validation-only until the App ID variable exists.
 
