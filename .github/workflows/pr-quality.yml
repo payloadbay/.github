@@ -41,7 +41,8 @@ jobs:
           require-conventional-title: true
           require-description: true
           max-description-length: 12000
-          max-emoji-count: 40
+          # Disabled because emoji provide visual structure in the shared PR template.
+          max-emoji-count: 0
           max-code-references: 20
           require-linked-issue: true
           blocked-terms: PINEAPPLE
