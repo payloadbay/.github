@@ -24,6 +24,26 @@ the common file and its repository copy contain conflicting edits, it creates
 or updates `automation/repository-baseline` and opens a pull request for manual
 resolution.
 
+## Pull request quality
+
+The shared pull request quality baseline includes:
+
+- the pull request template and metadata labeler;
+- Conventional Commit validation for pull request titles and commits;
+- branch-name validation;
+- Anti-Slop checks for contribution quality and automated abuse.
+
+The `Branch Name`, `Conventional Commits`, and `Conventional PR Title` checks
+run with read-only repository access. Anti-Slop runs from the trusted default
+branch through `pull_request_target`, does not check out contributor code, and
+may label, comment on, or close a pull request that reaches the configured
+failure threshold.
+
+The synchronized files are declared in
+[`.github/repository-baseline.json`](.github/repository-baseline.json). Required
+checks are configured separately in the `baseline:default-branch` ruleset after
+their check contexts have been verified on GitHub.
+
 ## Renovate
 
 [`renovate-config.json`](renovate-config.json) is a shared Renovate preset, not
