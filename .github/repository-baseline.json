@@ -1,0 +1,29 @@
+{
+  "$schema": "./repository-baseline.schema.json",
+  "organization": "payloadbay",
+  "sourceRepository": ".github",
+  "sourceBranch": "master",
+  "rulesetPrefix": "baseline:",
+  "statePath": ".github/.payloadbay-baseline.json",
+  "syncBranch": "automation/repository-baseline",
+  "excludedRepositories": [],
+  "managedFiles": [
+    ".github/ISSUE_TEMPLATE/bug-report.yml",
+    ".github/ISSUE_TEMPLATE/feature-request.yml",
+    ".github/ISSUE_TEMPLATE/config.yml",
+    ".github/PULL_REQUEST_TEMPLATE.md",
+    ".github/labeler.yml",
+    ".github/workflows/metadata-labeler.yml"
+  ],
+  "renovate": {
+    "preset": "local>payloadbay/.github:renovate-config",
+    "bootstrapPath": "renovate.json",
+    "configPaths": [
+      "renovate.json",
+      "renovate.json5",
+      ".github/renovate.json",
+      ".github/renovate.json5",
+      "package.json"
+    ]
+  }
+}

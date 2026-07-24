@@ -1,0 +1,217 @@
+[
+  {
+    "name": "area:accessibility",
+    "color": "c2e0c6",
+    "description": "Accessibility and assistive-technology support"
+  },
+  {
+    "name": "area:api",
+    "color": "b3d9ff",
+    "description": "Public API, API schema, RPCs, and contracts"
+  },
+  {
+    "name": "area:architecture",
+    "color": "d4c5f9",
+    "description": "Architecture and cross-cutting technical decisions"
+  },
+  {
+    "name": "area:auth",
+    "color": "f9d0c4",
+    "description": "Authentication, identity, sessions, and access"
+  },
+  {
+    "name": "area:brand",
+    "color": "fef2c0",
+    "description": "Brand identity and public messaging"
+  },
+  {
+    "name": "area:database",
+    "color": "c5def5",
+    "description": "Schemas, migrations, RLS, and database functions"
+  },
+  {
+    "name": "area:delivery",
+    "color": "bfdadc",
+    "description": "Routes, targets, deliveries, and attempts"
+  },
+  {
+    "name": "area:docs",
+    "color": "d4f4dd",
+    "description": "Public and operational documentation"
+  },
+  {
+    "name": "area:governance",
+    "color": "e8d3b9",
+    "description": "Governance and organization-wide policies"
+  },
+  {
+    "name": "area:infrastructure",
+    "color": "d6e4ff",
+    "description": "Deployment, CI, hosting, and infrastructure"
+  },
+  {
+    "name": "area:ingress",
+    "color": "bfe5bf",
+    "description": "Incoming webhook request processing"
+  },
+  {
+    "name": "area:integrations",
+    "color": "c7d8ff",
+    "description": "Provider integrations and integration tooling"
+  },
+  {
+    "name": "area:observability",
+    "color": "e0d7ff",
+    "description": "Logs, metrics, tracing, health, and incidents"
+  },
+  {
+    "name": "area:reliability",
+    "color": "cdeccd",
+    "description": "Queues, retries, recovery, and resilience"
+  },
+  {
+    "name": "area:runner",
+    "color": "b9e6e0",
+    "description": "Runner protocol, clients, routing, and connectivity"
+  },
+  {
+    "name": "area:sdk",
+    "color": "d1ecf1",
+    "description": "Public SDKs and generated clients"
+  },
+  {
+    "name": "area:security",
+    "color": "f5c6cb",
+    "description": "Security controls and abuse prevention"
+  },
+  {
+    "name": "area:storage",
+    "color": "e2d6bf",
+    "description": "Payload, response, fixture, and export storage"
+  },
+  {
+    "name": "area:ui-ux",
+    "color": "f3d1f4",
+    "description": "Dashboard and website user experience"
+  },
+  {
+    "name": "blocked",
+    "color": "b60205",
+    "description": "Cannot currently progress"
+  },
+  {
+    "name": "blocked:upstream",
+    "color": "8b0000",
+    "description": "Blocked by an upstream dependency or platform"
+  },
+  {
+    "name": "breaking change",
+    "color": "5319e7",
+    "description": "Change requiring downstream migration"
+  },
+  {
+    "name": "bug",
+    "color": "d73a4a",
+    "description": "Confirmed defect or unintended behavior"
+  },
+  {
+    "name": "cannot reproduce",
+    "color": "e4e669",
+    "description": "Maintainers could not reproduce the reported behavior"
+  },
+  {
+    "name": "dependencies",
+    "color": "0366d6",
+    "description": "Dependency or runtime updates"
+  },
+  {
+    "name": "documentation",
+    "color": "0075ca",
+    "description": "Documentation addition or improvement"
+  },
+  {
+    "name": "duplicate",
+    "color": "cfd3d7",
+    "description": "Already tracked elsewhere"
+  },
+  {
+    "name": "feature",
+    "color": "1d76db",
+    "description": "New product capability"
+  },
+  {
+    "name": "good first issue",
+    "color": "7057ff",
+    "description": "Suitable for a first contribution"
+  },
+  {
+    "name": "help wanted",
+    "color": "008672",
+    "description": "External contributions are welcome"
+  },
+  {
+    "name": "improvement",
+    "color": "84b6eb",
+    "description": "Improvement to an existing capability"
+  },
+  {
+    "name": "invalid",
+    "color": "d4c5f9",
+    "description": "Not a valid or actionable report"
+  },
+  {
+    "name": "maintenance",
+    "color": "6e7781",
+    "description": "Refactoring, cleanup, tooling, or internal maintenance"
+  },
+  {
+    "name": "needs:decision",
+    "color": "d876e3",
+    "description": "Requires a product or architecture decision"
+  },
+  {
+    "name": "needs:information",
+    "color": "d4c5f9",
+    "description": "More information is required from the author"
+  },
+  {
+    "name": "needs:reproduction",
+    "color": "f9d0c4",
+    "description": "A reproducible example is required"
+  },
+  {
+    "name": "needs:testing",
+    "color": "fef2c0",
+    "description": "Requires manual or environment-specific testing"
+  },
+  {
+    "name": "needs:triage",
+    "color": "fbca04",
+    "description": "Needs initial assessment and classification"
+  },
+  {
+    "name": "quality:exempt",
+    "color": "6f42c1",
+    "description": "Maintainer override for automated pull request quality checks"
+  },
+  {
+    "name": "spam",
+    "color": "000000",
+    "description": "Spam, advertising, or automated abuse"
+  },
+  {
+    "name": "tests",
+    "color": "bfdadc",
+    "description": "Tests, fixtures, or test infrastructure"
+  },
+  {
+    "name": "waiting:author",
+    "color": "c5def5",
+    "description": "Waiting for changes or feedback from the author"
+  },
+  {
+    "name": "wontfix",
+    "color": "ffffff",
+    "description": "Understood but intentionally not planned for implementation"
+  }
+]

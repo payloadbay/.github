@@ -1,0 +1,38 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Shared dependency update policy for Payload Bay repositories.",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    "group:monorepos"
+  ],
+  "dependencyDashboard": true,
+  "minimumReleaseAge": "7 days",
+  "schedule": ["before 6am on Monday"],
+  "timezone": "UTC",
+  "prConcurrentLimit": 5,
+  "branchConcurrentLimit": 5,
+  "rangeStrategy": "bump",
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
+  "labels": ["dependencies"],
+  "automerge": false,
+  "packageRules": [
+    {
+      "description": "Group non-major dependency updates into one weekly pull request.",
+      "groupName": "non-major dependencies",
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"]
+    },
+    {
+      "description": "Group GitHub Actions updates.",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions"
+    },
+    {
+      "description": "Group Docker image updates.",
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "groupName": "docker images"
+    }
+  ]
+}
