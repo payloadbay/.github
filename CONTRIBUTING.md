@@ -10,6 +10,7 @@
 - [Feature Requests](#love_letter-feature-requests)
 - [Triaging Issues](#mag-triaging-issues)
 - [Submitting Pull Requests](#repeat-submitting-pull-requests)
+- [Naming Branches](#twisted_rightwards_arrows-naming-branches)
 - [Usage of AI in Contributions](#robot-usage-of-ai-in-contributions)
 - [Writing Commit Messages](#memo-writing-commit-messages)
 - [Code Review](#white_check_mark-code-review)
@@ -72,7 +73,7 @@ We **love** pull requests! Before [forking a repository](https://docs.github.com
 
 *Note: All contributions will be licensed under the license of the repository receiving the contribution.*
 
-- **Follow the issue-first policy.** For non-trivial work, open or use an existing issue **before** coding. You do not need to wait for formal assignment, but you should wait for agreement on the direction when the change affects product behavior or architecture.
+- **Follow the issue-first policy.** For non-trivial work, open or use an existing issue **before** coding. Comment on the issue to state that you want to work on it, and wait for maintainer agreement before beginning substantial implementation. Changes that affect product behavior or architecture must have an agreed direction first.
 - **Complete the PR template.** Pull requests with a removed, empty, or materially incomplete template may be closed until the required information is provided.
 - **Link the issue.** Use a closing keyword such as `Fixes #123` when the pull request fully resolves an issue.
 - **Smaller is better.** Submit one focused pull request per bug fix, feature, or independently reviewable improvement. Do not combine unrelated refactoring or formatting with the intended change.
@@ -89,6 +90,51 @@ We **love** pull requests! Before [forking a repository](https://docs.github.com
 - When writing comments, use complete and respectful sentences, including enough context for someone reading them later.
 
 Payload Bay uses **squash merging** by default. The pull-request title becomes the final commit subject, so the title must follow the same Conventional Commit format as commit messages.
+
+Keep the title focused on the outcome:
+
+```text
+fix(runner): restore deliveries after reconnect
+```
+
+Place closing keywords in the pull-request description rather than the title:
+
+```text
+Fixes #456
+```
+
+## :twisted_rightwards_arrows: Naming Branches
+
+Create branches from the latest `master`. Branch names are validated for every pull request and must use lowercase kebab-case.
+
+For work tracked by an issue, use:
+
+```text
+<type>/<issue-number>-<short-description>
+```
+
+Examples:
+
+```text
+feat/123-event-replay
+fix/456-runner-reconnect
+docs/78-compose-installation
+refactor/91-delivery-state-machine
+```
+
+The issue number is required for `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, and `test` branches. The description should identify the intended outcome rather than repeat the type.
+
+Repository maintenance may use `build`, `chore`, or `ci` without an issue number when no corresponding issue exists:
+
+```text
+chore/pr-quality-baseline
+ci/update-commitlint
+build/refresh-container-metadata
+```
+
+If maintenance work already has an issue, include its number using the normal issue-backed format, for example `chore/142-remove-obsolete-workflow`. Automated dependency branches created by Renovate or Dependabot are exempt from this naming scheme.
+
+Personal prefixes, uppercase letters, underscores, and generic names such as `fix/stuff` are not accepted.
 
 ## :robot: Usage of AI in Contributions
 
