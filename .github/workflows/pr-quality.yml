@@ -50,9 +50,9 @@ jobs:
           optional-pr-template-sections: |
             🧩 Type of Change
             🗺️ Areas
-            How AI Was Used
-            AI Tools and Human Review
-            AI Responsibility
+            🛠️ How AI Was Used
+            🔎 AI Tools and Human Review
+            ✅ AI Responsibility
             📸 Screenshots, Logs, or Traces
             💬 Additional Context
           max-additional-pr-template-sections: 2

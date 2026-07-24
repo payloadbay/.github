@@ -112,7 +112,7 @@ Write "None" only after checking each category.
 - [ ] 🚫 No AI tools materially contributed to this pull request
 - [ ] 🤖 This pull request includes AI-assisted work
 
-### How AI Was Used
+### 🛠️ How AI Was Used
 
 <!-- If AI-assisted, select every applicable use. Otherwise leave these unchecked. -->
 
@@ -126,7 +126,7 @@ Write "None" only after checking each category.
 - [ ] 🔐 Security analysis
 - [ ] ⚙️ Other — explain below
 
-### AI Tools and Human Review
+### 🔎 AI Tools and Human Review
 
 <!--
 Required for AI-assisted work.
@@ -138,7 +138,7 @@ Name the tools used and explain:
 - Any generated suggestions you rejected or changed
 -->
 
-### AI Responsibility
+### ✅ AI Responsibility
 
 <!-- Required for AI-assisted work. -->
 
