@@ -26,7 +26,7 @@ Please review our [Code of Conduct](https://github.com/payloadbay/.github/blob/m
 
 ## :bulb: Asking Questions
 
-See our [Support Guide](https://github.com/payloadbay/.github/blob/master/SUPPORT.md). In short, GitHub issues should be reserved for actionable bug reports, feature requests, and planned work rather than support for a specific deployment.
+See our [Support Guide](https://github.com/payloadbay/.github/blob/master/SUPPORT.md). Use [Payload Bay Q&A](https://github.com/orgs/payloadbay/discussions/categories/q-a) for installation, configuration, troubleshooting, and usage help. GitHub Issues are reserved for actionable bug reports, concrete feature requests, and planned work.
 
 ## :inbox_tray: Opening an Issue
 
@@ -55,7 +55,9 @@ Feature requests are welcome! While we will consider all requests, we cannot gua
 
 If a request is accepted, that does not imply a commitment to a particular implementation or release date. You are welcome to help design or implement it after the direction has been agreed.
 
-- **Do not open a duplicate feature request.** Search existing issues and discussions first. If you find the same or a closely related request, contribute there.
+Use [Ideas](https://github.com/orgs/payloadbay/discussions/categories/ideas) when a proposal is early, needs product feedback, or is not yet clear enough to be reviewed as work. Use the Feature Request form only once the problem, intended outcome, and useful scope are concrete enough to track as a GitHub Issue. A concrete request is still not a commitment to accept, schedule, or implement it.
+
+- **Do not open a duplicate feature request.** Search existing issues and [Ideas](https://github.com/orgs/payloadbay/discussions/categories/ideas) first. If you find the same or a closely related request, contribute there.
 - **Fully complete the provided issue form.** It asks for the context needed to begin a productive conversation.
 - **Describe the problem and desired outcome.** Explain who benefits and how the proposal relates to existing functionality.
 - **Respect the project's non-goals.** Payload Bay is a webhook platform, not a general workflow builder, ETL platform, message broker, or arbitrary job runner.

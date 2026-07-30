@@ -5,16 +5,17 @@ answer without turning the issue tracker into a support queue.
 
 ## How to Get Help
 
-GitHub Issues are primarily used for confirmed bugs, actionable feature
+GitHub Issues are primarily used for confirmed bugs, concrete feature
 requests, and planned work. Questions about a particular installation,
-deployment, integration, or application belong in the public support channels
-of the affected repository.
+deployment, integration, or application belong in the organization's public
+Discussions.
 
 Please seek support in the following order:
 
 1. 📚 **Read the documentation and repository guides.**
 
-   Start with the affected repository's `README.md`, documentation, examples,
+   Start with the [Payload Bay product repository](https://github.com/payloadbay/payloadbay),
+   then read the affected repository's `README.md`, documentation, examples,
    release notes, and troubleshooting guides. Confirm that the instructions
    match the version you are running.
 
@@ -24,11 +25,12 @@ Please seek support in the following order:
    behavior. Searching first avoids duplicate work and may provide an immediate
    solution.
 
-3. 💬 **Ask in the affected repository's GitHub Discussions.**
+3. 💬 **Ask in [Payload Bay Q&A](https://github.com/orgs/payloadbay/discussions/categories/q-a).**
 
-   Open the **Discussions** tab in the Payload Bay repository containing the
-   component you need help with. Choose the most appropriate question or support
-   category available there.
+   Use organization Q&A for installation, configuration, operation,
+   troubleshooting, and usage questions. It is shared across Payload Bay
+   repositories, so answers remain discoverable even when a question touches
+   more than one component.
 
    A useful support request includes:
 
@@ -40,11 +42,22 @@ Please seek support in the following order:
    - A minimal configuration or reproduction where practical
    - Sanitized logs, errors, screenshots, or traces
 
-4. 🐛 **Open an issue only when the result is actionable project work.**
+4. 💡 **Use [Ideas](https://github.com/orgs/payloadbay/discussions/categories/ideas) for early product feedback.**
+
+   Discuss a proposal there when it is still exploratory, needs feedback, or
+   has not yet become a concrete feature request. A maintainer may later turn a
+   sufficiently clear discussion into an Issue.
+
+5. 📣 **Use [Show and tell](https://github.com/orgs/payloadbay/discussions/categories/show-and-tell) to share a setup or use case.**
+
+   Show how you use Payload Bay, including integrations, deployment patterns,
+   or lessons from a real implementation. This is not an issue tracker.
+
+6. 🐛 **Open an issue only when the result is actionable project work.**
 
    Use the repository's issue forms for a reproducible bug, a concrete
-   documentation problem, or a feature request. Fully complete the form and link
-   any related discussion.
+   documentation problem, or a feature request that is ready for issue-based
+   review. Fully complete the form and link any related discussion.
 
 Public questions receive public answers, allowing other users to find and
 improve them later.
@@ -82,9 +95,8 @@ Please **do not**:
 3. ❌ Open duplicate issues or add comments that only say `+1`. Use GitHub
    reactions when you want to indicate that an existing issue also affects you.
 
-4. ❌ Cross-post the same question across several Payload Bay repositories.
-   Choose the repository that owns the affected component and link related
-   context when necessary.
+4. ❌ Cross-post the same question across several repositories or categories.
+   Use organization Q&A and link related context when necessary.
 
 5. ❌ Attach an entire private project and ask contributors to debug it for you.
    Create the smallest safe reproduction that demonstrates the problem.

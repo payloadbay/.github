@@ -19,6 +19,11 @@ repository can therefore add its own Issue Forms, workflows, labels, and
 rulesets. Repository-specific rulesets must not use the reserved `baseline:`
 prefix.
 
+Community health files such as `CONTRIBUTING.md`, `SUPPORT.md`, `SECURITY.md`,
+and the organization profile live in this repository as GitHub's organization
+defaults. They apply when a public repository does not provide its own file and
+are intentionally not force-synchronized over repository-specific guidance.
+
 Common files are merged against the last version applied to each repository.
 The synchronizer commits a clean merge directly to the default branch. If both
 the common file and its repository copy contain conflicting edits, it creates
