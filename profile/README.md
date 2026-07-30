@@ -1,31 +1,77 @@
-# Payload Bay
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/payloadbay/brand/master/dist/logo/payloadbay-logo-dark-rounded.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/payloadbay/brand/master/dist/logo/payloadbay-logo-light-rounded.svg">
+    <img src="https://raw.githubusercontent.com/payloadbay/brand/master/dist/logo/payloadbay-logo-light-rounded.svg" alt="Payload Bay" width="640">
+  </picture>
+</p>
 
-**A safe landing place for every event.**
+<p align="center">
+  <strong>A safe landing place for every event.</strong>
+  <br>
+  Receive instantly. Deliver reliably.
+</p>
+
+<p align="center">
+  <a href="https://payloadbay.dev">Website</a>
+  ·
+  <a href="https://payloadbay.dev/docs">Documentation</a>
+  ·
+  <a href="https://github.com/payloadbay/brand">Brand assets</a>
+</p>
 
 Payload Bay is an open-source, self-hosted webhook gateway for receiving,
 verifying, storing, routing, retrying, and replaying events.
 
-It helps applications receive webhooks through stable ingress URLs, preserve
-the original requests, deliver events reliably, inspect failures, and reach
-local or private services through outbound runners.
+It gives external providers a stable ingress endpoint while keeping webhook
+handling, delivery reliability, and private application access outside the
+application itself.
 
-## Project status
+## What Payload Bay does
 
-Payload Bay is currently in early development. The architecture and public
-interfaces may change while the core delivery model is being validated.
+- **Receive** webhooks through stable canonical URLs and custom aliases.
+- **Verify** provider signatures against the unchanged request body.
+- **Persist** events and receipts before acknowledging the provider.
+- **Route** one event to HTTP targets or outbound application runners.
+- **Deliver** asynchronously with honest at-least-once semantics.
+- **Retry and replay** failed or previously received events.
+- **Inspect** payloads, deliveries, attempts, responses, and incidents.
+- **Reach private applications** without exposing inbound webhook endpoints.
+
+## Self-hosted by default
+
+Payload Bay Community is designed to run entirely in infrastructure controlled
+by its operator. A Community installation does not require a Payload Bay
+account, activation server, central cloud service, or external license
+validation.
+
+Core webhook functionality is not restricted by artificial event, workspace,
+source, target, or runner limits. Practical capacity is determined by the
+installation's own infrastructure.
 
 ## Principles
 
-- Self-hosted by default
-- At-least-once delivery with durable event storage
+- Reliability before feature count
+- At-least-once delivery instead of exactly-once claims
+- Durable event storage and configurable retries
 - Provider-aware signature verification
-- Configurable retries and replay
-- No event, workspace, source, or runner limits in the Community Edition
-- No dependency on a central Payload Bay service
+- Clear technical terminology without forced nautical metaphors
+- No mandatory central telemetry or Payload Bay service dependency
+- Community core features without artificial usage limits
 
-## Links
+## Project status
 
-- [Website](https://payloadbay.dev)
-- [Documentation](https://payloadbay.dev/docs)
+Payload Bay is in early development. The architecture and public interfaces may
+change while the ingestion, queue, delivery, and runner models are validated.
 
-> Receive instantly. Deliver reliably.
+The first implementation work focuses on proving the complete delivery path
+before stabilizing the dashboard, public API, or SDK.
+
+## Project links
+
+- [payloadbay.dev](https://payloadbay.dev) - project website and documentation hub
+- [Documentation](https://payloadbay.dev/docs) - public product and operations documentation
+- [Brand repository](https://github.com/payloadbay/brand) - canonical identity references and generated assets
+- [Organization standards](https://github.com/payloadbay/.github) - contribution, security, and repository baseline
+
+> Reliable webhook delivery without coupling providers to your application.
