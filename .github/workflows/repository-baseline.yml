@@ -15,6 +15,7 @@ on:
       - ".github/scripts/repository-baseline.mjs"
       - ".github/scripts/repository-baseline.test.mjs"
       - ".github/workflows/metadata-labeler.yml"
+      - ".github/workflows/planned-work-guard.yml"
       - ".github/workflows/commitlint.yml"
       - ".github/workflows/pr-quality.yml"
       - ".github/workflows/repository-baseline.yml"

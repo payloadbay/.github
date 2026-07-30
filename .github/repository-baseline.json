@@ -6,16 +6,26 @@
   "rulesetPrefix": "baseline:",
   "statePath": ".github/.payloadbay-baseline.json",
   "syncBranch": "automation/repository-baseline",
+  "managedAutolinkPrefixes": ["PAB-"],
+  "autolinks": [
+    {
+      "keyPrefix": "PAB-",
+      "urlTemplate": "https://linear.app/thedannicraft/issue/PAB-<num>",
+      "isAlphanumeric": false
+    }
+  ],
   "excludedRepositories": [],
   "managedFiles": [
     ".github/ISSUE_TEMPLATE/bug-report.yml",
     ".github/ISSUE_TEMPLATE/feature-request.yml",
+    ".github/ISSUE_TEMPLATE/planned-work.yml",
     ".github/ISSUE_TEMPLATE/config.yml",
     ".github/pull_request_template.md",
     ".github/commitlint.config.mjs",
     ".github/labeler.yml",
     ".github/workflows/commitlint.yml",
     ".github/workflows/metadata-labeler.yml",
+    ".github/workflows/planned-work-guard.yml",
     ".github/workflows/pr-quality.yml"
   ],
   "renovate": {

@@ -48,14 +48,7 @@ jobs:
           blocked-terms: PINEAPPLE
           require-pr-template: true
           strict-pr-template-sections: "📋 Checklist"
-          optional-pr-template-sections: |
-            🧩 Type of Change
-            🗺️ Areas
-            🛠️ How AI Was Used
-            🔎 AI Tools and Human Review
-            ✅ AI Responsibility
-            📸 Screenshots, Logs, or Traces
-            💬 Additional Context
+          optional-pr-template-sections: "🧩 Type of Change, 🗺️ Areas, 🛠️ How AI Was Used, 🔎 AI Tools and Human Review, ✅ AI Responsibility, 📸 Screenshots, Logs, or Traces, 💬 Additional Context"
           max-additional-pr-template-sections: 2
           max-commit-message-length: 500
           require-conventional-commits: true

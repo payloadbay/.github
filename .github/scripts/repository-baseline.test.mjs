@@ -6,6 +6,7 @@ import {
   hashContent,
   mergeManagedFile,
   normalizeRuleset,
+  planAutolinkChanges,
   planLabelChanges,
   planRulesetChanges,
   portableRepositorySettings,
@@ -44,6 +45,78 @@ test("planLabelChanges creates, updates, and preserves unmanaged labels", () => 
     update: [desired[0]],
     unmanaged: ["local"],
   });
+});
+
+test("planAutolinkChanges creates, replaces, removes, and preserves autolinks", () => {
+  const current = [
+    {
+      id: 1,
+      key_prefix: "PAB-",
+      url_template: "https://old.example/PAB-<num>",
+      is_alphanumeric: false,
+    },
+    {
+      id: 2,
+      key_prefix: "OLD-",
+      url_template: "https://old.example/<num>",
+      is_alphanumeric: false,
+    },
+    {
+      id: 3,
+      key_prefix: "LOCAL-",
+      url_template: "https://local.example/<num>",
+      is_alphanumeric: false,
+    },
+  ];
+  const desired = [
+    {
+      keyPrefix: "PAB-",
+      urlTemplate: "https://linear.app/example/issue/PAB-<num>",
+      isAlphanumeric: false,
+    },
+    {
+      keyPrefix: "NEW-",
+      urlTemplate: "https://new.example/<num>",
+      isAlphanumeric: true,
+    },
+  ];
+
+  assert.deepEqual(
+    planAutolinkChanges(current, desired, ["PAB-", "OLD-", "NEW-"]),
+    {
+      create: [
+        {
+          key_prefix: "NEW-",
+          url_template: "https://new.example/<num>",
+          is_alphanumeric: true,
+        },
+      ],
+      replace: [
+        {
+          current: current[0],
+          desired: {
+            key_prefix: "PAB-",
+            url_template: "https://linear.app/example/issue/PAB-<num>",
+            is_alphanumeric: false,
+          },
+        },
+      ],
+      remove: [current[1]],
+      unmanaged: [current[2]],
+    },
+  );
+});
+
+test("planAutolinkChanges rejects prefixes outside its namespace", () => {
+  assert.throws(
+    () =>
+      planAutolinkChanges(
+        [],
+        [{ keyPrefix: "PAB-", urlTemplate: "https://example/<num>" }],
+        ["OTHER-"],
+      ),
+    /not in the managed namespace/,
+  );
 });
 
 test("portableRepositorySettings includes only the merge baseline", () => {

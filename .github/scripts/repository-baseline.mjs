@@ -66,6 +66,66 @@ export function planLabelChanges(currentLabels, desiredLabels) {
   return { create, update, unmanaged };
 }
 
+function normalizeAutolink(autolink) {
+  return {
+    key_prefix: autolink.keyPrefix ?? autolink.key_prefix,
+    url_template: autolink.urlTemplate ?? autolink.url_template,
+    is_alphanumeric:
+      autolink.isAlphanumeric ?? autolink.is_alphanumeric ?? false,
+  };
+}
+
+export function planAutolinkChanges(
+  currentAutolinks,
+  desiredAutolinks,
+  managedPrefixes,
+) {
+  const managed = new Set(managedPrefixes);
+  const desired = desiredAutolinks.map(normalizeAutolink);
+  const desiredByPrefix = new Map();
+
+  for (const autolink of desired) {
+    if (!managed.has(autolink.key_prefix)) {
+      throw new Error(
+        `Autolink prefix ${autolink.key_prefix} is not in the managed namespace`,
+      );
+    }
+    if (desiredByPrefix.has(autolink.key_prefix)) {
+      throw new Error(`Duplicate autolink prefix: ${autolink.key_prefix}`);
+    }
+    desiredByPrefix.set(autolink.key_prefix, autolink);
+  }
+
+  const currentByPrefix = new Map(
+    currentAutolinks.map((autolink) => [autolink.key_prefix, autolink]),
+  );
+  const create = [];
+  const replace = [];
+
+  for (const autolink of desired) {
+    const current = currentByPrefix.get(autolink.key_prefix);
+    if (!current) {
+      create.push(autolink);
+    } else if (
+      current.url_template !== autolink.url_template ||
+      Boolean(current.is_alphanumeric) !== autolink.is_alphanumeric
+    ) {
+      replace.push({ current, desired: autolink });
+    }
+  }
+
+  const remove = currentAutolinks.filter(
+    (autolink) =>
+      managed.has(autolink.key_prefix) &&
+      !desiredByPrefix.has(autolink.key_prefix),
+  );
+  const unmanaged = currentAutolinks.filter(
+    (autolink) => !managed.has(autolink.key_prefix),
+  );
+
+  return { create, replace, remove, unmanaged };
+}
+
 export function portableRepositorySettings(sourceRepository) {
   return {
     default_branch: sourceRepository.default_branch,
@@ -405,6 +465,49 @@ async function synchronizeLabels(api, owner, repository, desiredLabels) {
   }
 }
 
+async function synchronizeAutolinks(
+  api,
+  owner,
+  repository,
+  desiredAutolinks,
+  managedPrefixes,
+) {
+  const current = await api.paginate(`/repos/${owner}/${repository}/autolinks`);
+  const plan = planAutolinkChanges(current, desiredAutolinks, managedPrefixes);
+
+  for (const autolink of plan.create) {
+    console.log(`  autolink + ${autolink.key_prefix}`);
+    await api.mutate(`/repos/${owner}/${repository}/autolinks`, {
+      method: "POST",
+      body: autolink,
+    });
+  }
+  for (const replacement of plan.replace) {
+    console.log(`  autolink ~ ${replacement.desired.key_prefix}`);
+    await api.mutate(
+      `/repos/${owner}/${repository}/autolinks/${replacement.current.id}`,
+      { method: "DELETE" },
+    );
+    await api.mutate(`/repos/${owner}/${repository}/autolinks`, {
+      method: "POST",
+      body: replacement.desired,
+    });
+  }
+  for (const autolink of plan.remove) {
+    console.log(`  autolink - ${autolink.key_prefix}`);
+    await api.mutate(`/repos/${owner}/${repository}/autolinks/${autolink.id}`, {
+      method: "DELETE",
+    });
+  }
+  if (plan.unmanaged.length > 0) {
+    console.log(
+      `  unmanaged autolinks: ${plan.unmanaged
+        .map((autolink) => autolink.key_prefix)
+        .join(", ")}`,
+    );
+  }
+}
+
 async function synchronizeSettings(
   api,
   owner,
@@ -515,11 +618,12 @@ async function loadLocalBaseline(config) {
   return files;
 }
 
-function serializeState(sourceCommit, baselineFiles) {
+function serializeState(sourceCommit, baselineFiles, autolinks) {
   return `${JSON.stringify(
     {
-      schemaVersion: 1,
+      schemaVersion: 2,
       sourceCommit,
+      autolinks: autolinks.map(normalizeAutolink),
       files: Object.fromEntries(
         [...baselineFiles.entries()].map(([path, content]) => [
           path,
@@ -540,9 +644,13 @@ function parseState(content) {
     return null;
   }
   const state = JSON.parse(content);
-  if (state.schemaVersion !== 1 || typeof state.files !== "object") {
+  if (
+    ![1, 2].includes(state.schemaVersion) ||
+    typeof state.files !== "object"
+  ) {
     throw new Error("Unsupported baseline state format");
   }
+  state.autolinks ??= [];
   return state;
 }
 
@@ -626,12 +734,14 @@ async function planFileSynchronization({
     [...baselineFiles.entries()].some(
       ([path, content]) => state.files?.[path]?.hash !== hashContent(content),
     ) ||
-    Object.keys(state.files).some((path) => !baselineFiles.has(path));
+    Object.keys(state.files).some((path) => !baselineFiles.has(path)) ||
+    JSON.stringify(state.autolinks) !==
+      JSON.stringify(config.autolinks.map(normalizeAutolink));
 
   if (baselineChanged) {
     changes.push({
       path: config.statePath,
-      content: serializeState(sourceCommit, baselineFiles),
+      content: serializeState(sourceCommit, baselineFiles, config.autolinks),
     });
   }
 
@@ -856,6 +966,13 @@ async function main() {
         `/repos/${owner}/${repository.name}`,
       );
       await synchronizeLabels(api, owner, repository.name, desiredLabels);
+      await synchronizeAutolinks(
+        api,
+        owner,
+        repository.name,
+        config.autolinks,
+        config.managedAutolinkPrefixes,
+      );
       const targetBranch = await synchronizeSettings(
         api,
         owner,

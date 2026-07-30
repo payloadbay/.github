@@ -6,12 +6,13 @@ Repository-specific configuration remains in the repository that uses it.
 
 ## Managed configuration
 
-The baseline synchronizer manages four kinds of configuration:
+The baseline synchronizer manages these shared configuration categories:
 
 - paths listed in [`.github/repository-baseline.json`](.github/repository-baseline.json);
 - labels declared in [`.github/labels.json`](.github/labels.json);
 - selected merge settings read from the live `.github` repository settings;
-- repository rulesets whose names start with `baseline:`.
+- repository rulesets whose names start with `baseline:`;
+- repository autolinks in the prefixes reserved by the baseline manifest.
 
 Files outside the managed path list are not copied, changed, or deleted. A
 repository can therefore add its own Issue Forms, workflows, labels, and
@@ -23,6 +24,15 @@ The synchronizer commits a clean merge directly to the default branch. If both
 the common file and its repository copy contain conflicting edits, it creates
 or updates `automation/repository-baseline` and opens a pull request for manual
 resolution.
+
+## Planned work and Linear
+
+The maintainer-only Planned Work form exposes approved implementation work when
+it is useful to track that work publicly. Linear remains the canonical planning
+record. The baseline configures the `PAB-` autolink in every managed
+repository, so a short identifier such as `PAB-49` links to its Linear issue.
+Submissions from users without repository collaboration access are closed
+automatically as not planned.
 
 ## Pull request quality
 
@@ -97,6 +107,10 @@ remain local.
 The synchronization App is added as a bypass actor only in target
 repositories. It does not bypass the rules protecting the `.github` source
 repository.
+
+Autolink prefixes listed in `managedAutolinkPrefixes` are reserved for the
+baseline. Matching autolinks are created, corrected, or removed to match the
+manifest. Autolinks with any other prefix remain repository-specific.
 
 ## Running the workflow
 
