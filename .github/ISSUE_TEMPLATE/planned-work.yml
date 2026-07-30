@@ -9,18 +9,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        This form is for Payload Bay maintainers documenting work that has already been approved and planned in Linear.
+        This form is for Payload Bay maintainers documenting approved work that should be visible publicly.
 
         External feature proposals belong in the feature or improvement request form. Issues submitted through this form by users without repository collaboration access are closed automatically as not planned.
 
-  - type: input
-    id: linear-issue
-    attributes:
-      label: Linear issue
-      description: Enter the canonical Linear identifier. GitHub automatically links identifiers such as PAB-49.
-      placeholder: PAB-49
-    validations:
-      required: true
+        After the issue is created, GitHub Issues Sync creates its canonical Linear issue and the Linear bot posts the PAB identifier in a comment. Do not create a separate Linear issue first.
 
   - type: dropdown
     id: work-type

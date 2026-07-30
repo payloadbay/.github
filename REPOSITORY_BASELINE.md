@@ -28,11 +28,19 @@ resolution.
 ## Planned work and Linear
 
 The maintainer-only Planned Work form exposes approved implementation work when
-it is useful to track that work publicly. Linear remains the canonical planning
-record. The baseline configures the `PAB-` autolink in every managed
-repository, so a short identifier such as `PAB-49` links to its Linear issue.
-Submissions from users without repository collaboration access are closed
-automatically as not planned.
+it is useful to track that work publicly. Create the GitHub issue first. GitHub
+Issues Sync then creates the canonical Linear issue and posts its `PAB-`
+identifier as a linkback comment. Enrich that synchronized issue with its
+project, milestone, labels, assignee, and genuine dependencies; do not create a
+second Linear issue for the same work.
+
+Pull requests close the public issue with `Fixes #123`. Contributors do not
+need to know or repeat the synchronized Linear identifier. The Linear bot's
+linkback comment on the GitHub issue provides the public cross-reference. The
+baseline also configures the `PAB-` autolink in every managed repository, so
+maintainer references remain clickable where they are useful. Submissions from
+users without repository collaboration access are closed automatically as not
+planned.
 
 ## Pull request quality
 
