@@ -9,6 +9,8 @@
     "rulesetPrefix",
     "statePath",
     "syncBranch",
+    "managedAutolinkPrefixes",
+    "autolinks",
     "excludedRepositories",
     "managedFiles",
     "renovate"
@@ -40,6 +42,37 @@
     "syncBranch": {
       "type": "string",
       "minLength": 1
+    },
+    "managedAutolinkPrefixes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "autolinks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["keyPrefix", "urlTemplate", "isAlphanumeric"],
+        "properties": {
+          "keyPrefix": {
+            "type": "string",
+            "minLength": 1
+          },
+          "urlTemplate": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "<num>"
+          },
+          "isAlphanumeric": {
+            "type": "boolean"
+          }
+        }
+      }
     },
     "excludedRepositories": {
       "type": "array",

@@ -42,6 +42,38 @@ labels:
   - label: maintenance
     body: '(?m)^- \[[xX]\] 🧹 Maintenance$'
 
+  # Planned-work issue types. GitHub renders multi-select dropdowns as a
+  # comma-separated line, so match complete option tokens.
+  - label: bug
+    body: '(?m)^(?:[^,\r\n]+,\s*)*🐛 Bug fix(?:,\s*[^,\r\n]+)*\r?$'
+
+  - label: feature
+    body: '(?m)^(?:[^,\r\n]+,\s*)*✨ New feature(?:,\s*[^,\r\n]+)*\r?$'
+
+  - label: improvement
+    body: '(?m)^(?:[^,\r\n]+,\s*)*🔧 Improvement to existing behavior(?:,\s*[^,\r\n]+)*\r?$'
+
+  - label: breaking change
+    body: '(?m)^(?:[^,\r\n]+,\s*)*💥 Breaking change(?:,\s*[^,\r\n]+)*\r?$'
+
+  - label: maintenance
+    body: '(?m)^(?:[^,\r\n]+,\s*)*♻️ Refactor without an intended behavior change(?:,\s*[^,\r\n]+)*\r?$'
+
+  - label: documentation
+    body: '(?m)^(?:[^,\r\n]+,\s*)*🧾 Documentation(?:,\s*[^,\r\n]+)*\r?$'
+
+  - label: tests
+    body: '(?m)^(?:[^,\r\n]+,\s*)*🧪 Tests(?:,\s*[^,\r\n]+)*\r?$'
+
+  - label: maintenance
+    body: '(?m)^(?:[^,\r\n]+,\s*)*🤖 CI/CD or automation(?:,\s*[^,\r\n]+)*\r?$'
+
+  - label: dependencies
+    body: '(?m)^(?:[^,\r\n]+,\s*)*⬆️ Dependency update(?:,\s*[^,\r\n]+)*\r?$'
+
+  - label: maintenance
+    body: '(?m)^(?:[^,\r\n]+,\s*)*🧹 Maintenance(?:,\s*[^,\r\n]+)*\r?$'
+
   # Pull request areas
   - label: area:accessibility
     body: '(?m)^- \[[xX]\] Accessibility$'
@@ -99,6 +131,46 @@ labels:
 
   - label: area:ui-ux
     body: '(?m)^- \[[xX]\] UI/UX$'
+
+  # Planned-work issue areas
+  - label: area:accessibility
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Accessibility(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:api
+    body: '(?m)^(?:[^,\r\n]+,\s*)*API(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:architecture
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Architecture(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:auth
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Authentication(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:brand
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Brand(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:database
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Database(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:delivery
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Delivery(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:docs
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Documentation(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:governance
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Governance(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:infrastructure
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Infrastructure(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:ingress
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Ingress(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:integrations
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Integrations(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:observability
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Observability(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:reliability
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Reliability(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:runner
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Runner(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:sdk
+    body: '(?m)^(?:[^,\r\n]+,\s*)*SDK(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:security
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Security(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:storage
+    body: '(?m)^(?:[^,\r\n]+,\s*)*Storage(?:,\s*[^,\r\n]+)*\r?$'
+  - label: area:ui-ux
+    body: '(?m)^(?:[^,\r\n]+,\s*)*UI/UX(?:,\s*[^,\r\n]+)*\r?$'
 
   # Bug report areas
   # Compatibility contract with ISSUE_TEMPLATE/bug-report.yml:

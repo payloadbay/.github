@@ -165,6 +165,11 @@
     "description": "Refactoring, cleanup, tooling, or internal maintenance"
   },
   {
+    "name": "maintainer:planned-work",
+    "color": "6f42c1",
+    "description": "Approved public work item created through the maintainer form"
+  },
+  {
     "name": "needs:decision",
     "color": "d876e3",
     "description": "Requires a product or architecture decision"
