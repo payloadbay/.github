@@ -17,7 +17,7 @@
   ·
   <a href="https://payloadbay.dev/docs">Documentation</a>
   ·
-  <a href="https://github.com/payloadbay/brand">Brand assets</a>
+  <a href="https://github.com/payloadbay/brand/blob/master/BRAND.md">Brand guide</a>
 </p>
 
 Payload Bay is an open-source, self-hosted webhook gateway for receiving,
@@ -26,6 +26,13 @@ verifying, storing, routing, retrying, and replaying events.
 It gives external providers a stable ingress endpoint while keeping webhook
 handling, delivery reliability, and private application access outside the
 application itself.
+
+## Brand
+
+The [Payload Bay Brand Guide](https://github.com/payloadbay/brand/blob/master/BRAND.md)
+is the official reference for approved claims, logo and icon usage, colors, and
+public-facing language. Use the [generated assets](https://github.com/payloadbay/brand/tree/master/dist)
+rather than copying or redrawing them.
 
 ## What Payload Bay does
 
@@ -71,7 +78,8 @@ before stabilizing the dashboard, public API, or SDK.
 
 - [payloadbay.dev](https://payloadbay.dev) - project website and documentation hub
 - [Documentation](https://payloadbay.dev/docs) - public product and operations documentation
-- [Brand repository](https://github.com/payloadbay/brand) - canonical identity references and generated assets
+- [Brand guide](https://github.com/payloadbay/brand/blob/master/BRAND.md) - approved identity and usage guidance
+- [Brand assets](https://github.com/payloadbay/brand/tree/master/dist) - generated logo, icon, favicon, and palette assets
 - [Organization standards](https://github.com/payloadbay/.github) - contribution, security, and repository baseline
 
 > Reliable webhook delivery without coupling providers to your application.
