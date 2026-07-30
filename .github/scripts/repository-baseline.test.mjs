@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -242,4 +243,129 @@ test("hasCentralRenovatePreset supports renovate and package configs", () => {
 test("hashContent is stable", () => {
   assert.equal(hashContent("payload bay"), hashContent("payload bay"));
   assert.notEqual(hashContent("payload bay"), hashContent("Payload Bay"));
+});
+
+function parseLabelMatchers(configuration) {
+  const matchers = [];
+  let current = null;
+
+  for (const line of configuration.split("\n")) {
+    const label = line.match(/^  - label: (.+)$/);
+    if (label) {
+      current = { label: label[1] };
+      matchers.push(current);
+      continue;
+    }
+
+    const property = line.match(/^    (type|title|body): (.+)$/);
+    if (!current || !property) continue;
+    const value = property[2];
+    current[property[1]] =
+      value.startsWith("'") && value.endsWith("'") ? value.slice(1, -1) : value;
+  }
+
+  return matchers;
+}
+
+function compileLabelPattern(pattern) {
+  return pattern.startsWith("(?m)")
+    ? new RegExp(pattern.slice(4), "m")
+    : new RegExp(pattern);
+}
+
+function labelsFor(matchers, record) {
+  return new Set(
+    matchers
+      .filter(
+        (matcher) =>
+          (!matcher.type || matcher.type === record.type) &&
+          (!matcher.title || compileLabelPattern(matcher.title).test(record.title)) &&
+          (!matcher.body || compileLabelPattern(matcher.body).test(record.body)),
+      )
+      .map(({ label }) => label),
+  );
+}
+
+const metadataMatchers = parseLabelMatchers(
+  readFileSync(new URL("../labeler.yml", import.meta.url), "utf8"),
+);
+
+test("metadata label rules declare their record type", () => {
+  assert.ok(metadataMatchers.length > 0);
+  assert.ok(metadataMatchers.every(({ type }) => type === "issue" || type === "pull_request"));
+});
+
+test("pull request prose cannot trigger planned-work area labels", () => {
+  const labels = labelsFor(metadataMatchers, {
+    type: "pull_request",
+    title: "feat(brand): generate application icon variants",
+    body: `## 🧩 Type of Change
+
+- [x] ✨ New feature
+
+## 🗺️ Areas
+
+- [ ] API
+- [x] Brand
+- [x] Infrastructure
+
+## 🔐 Security, Compatibility, and Operations
+
+No authentication, API, persisted data, configuration, or environment variables change.
+`,
+  });
+
+  assert.equal(labels.has("feature"), true);
+  assert.equal(labels.has("area:brand"), true);
+  assert.equal(labels.has("area:infrastructure"), true);
+  assert.equal(labels.has("area:api"), false);
+});
+
+test("planned-work labels only match values under their form headings", () => {
+  const labels = labelsFor(metadataMatchers, {
+    type: "issue",
+    title: "[Planned]: Correct metadata label matching boundaries",
+    body: `### Type of work
+
+🐛 Bug fix, 🤖 CI/CD or automation, 🧪 Tests, 🧹 Maintenance
+
+### Affected areas
+
+Governance, Infrastructure
+
+### Expected outcome
+
+No authentication, API, persisted data, configuration, or environment variables change.
+`,
+  });
+
+  assert.equal(labels.has("bug"), true);
+  assert.equal(labels.has("tests"), true);
+  assert.equal(labels.has("maintenance"), true);
+  assert.equal(labels.has("area:governance"), true);
+  assert.equal(labels.has("area:infrastructure"), true);
+  assert.equal(labels.has("area:api"), false);
+});
+
+test("feature and bug issue mappings remain valid", () => {
+  const featureLabels = labelsFor(metadataMatchers, {
+    type: "issue",
+    title: "[Feature]: Add provider support",
+    body: `### Request type
+
+New product capability
+`,
+  });
+  assert.equal(featureLabels.has("feature"), true);
+
+  const bugLabels = labelsFor(metadataMatchers, {
+    type: "issue",
+    title: "[Bug]: SDK request fails",
+    body: `### Affected area
+
+API or SDK
+`,
+  });
+  assert.equal(bugLabels.has("area:api"), true);
+  assert.equal(bugLabels.has("area:sdk"), true);
 });
