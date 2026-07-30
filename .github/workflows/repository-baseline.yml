@@ -1,6 +1,23 @@
 name: Repository Baseline
 
 on:
+  pull_request:
+    paths:
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/pull_request_template.md"
+      - ".github/commitlint.config.mjs"
+      - ".github/labeler.yml"
+      - ".github/labels.json"
+      - ".github/repository-baseline.json"
+      - ".github/repository-baseline.schema.json"
+      - ".github/scripts/repository-baseline.mjs"
+      - ".github/scripts/repository-baseline.test.mjs"
+      - ".github/workflows/metadata-labeler.yml"
+      - ".github/workflows/planned-work-guard.yml"
+      - ".github/workflows/commitlint.yml"
+      - ".github/workflows/pr-quality.yml"
+      - ".github/workflows/repository-baseline.yml"
+      - "renovate-config.json"
   push:
     branches:
       - master
@@ -64,7 +81,7 @@ jobs:
   synchronize:
     name: Synchronize Repositories
     needs: validate
-    if: ${{ vars.PAYLOADBAY_BASELINE_APP_ID != '' }}
+    if: ${{ github.event_name != 'pull_request' && vars.PAYLOADBAY_BASELINE_APP_ID != '' }}
     runs-on: ubuntu-latest
 
     steps:
