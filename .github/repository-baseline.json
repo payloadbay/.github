@@ -16,6 +16,7 @@
   ],
   "excludedRepositories": [],
   "managedFiles": [
+    "AGENTS.md",
     ".github/ISSUE_TEMPLATE/bug-report.yml",
     ".github/ISSUE_TEMPLATE/feature-request.yml",
     ".github/ISSUE_TEMPLATE/planned-work.yml",
