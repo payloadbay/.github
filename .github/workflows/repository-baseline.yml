@@ -3,6 +3,7 @@ name: Repository Baseline
 on:
   pull_request:
     paths:
+      - "AGENTS.md"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/pull_request_template.md"
       - ".github/commitlint.config.mjs"
@@ -22,6 +23,7 @@ on:
     branches:
       - master
     paths:
+      - "AGENTS.md"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/pull_request_template.md"
       - ".github/commitlint.config.mjs"

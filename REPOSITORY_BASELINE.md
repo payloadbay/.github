@@ -19,6 +19,10 @@ repository can therefore add its own Issue Forms, workflows, labels, and
 rulesets. Repository-specific rulesets must not use the reserved `baseline:`
 prefix.
 
+`AGENTS.md` is a managed root-level baseline for coding agents. Repositories
+extend it through an optional root-level `AGENTS.local.md`, which remains local
+and is never synchronized or overwritten.
+
 Community health files such as `CONTRIBUTING.md`, `SUPPORT.md`, `SECURITY.md`,
 and the organization profile live in this repository as GitHub's organization
 defaults. They apply when a public repository does not provide its own file and
