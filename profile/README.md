@@ -17,6 +17,8 @@
   ·
   <a href="https://payloadbay.dev/docs">Documentation</a>
   ·
+  <a href="https://github.com/orgs/payloadbay/discussions">Discussions</a>
+  ·
   <a href="https://github.com/payloadbay/brand/blob/master/BRAND.md">Brand guide</a>
 </p>
 
@@ -78,6 +80,7 @@ before stabilizing the dashboard, public API, or SDK.
 
 - [payloadbay.dev](https://payloadbay.dev) - project website and documentation hub
 - [Documentation](https://payloadbay.dev/docs) - public product and operations documentation
+- [Community discussions](https://github.com/orgs/payloadbay/discussions) - Q&A, early ideas, and real-world use cases
 - [Brand guide](https://github.com/payloadbay/brand/blob/master/BRAND.md) - approved identity and usage guidance
 - [Brand assets](https://github.com/payloadbay/brand/tree/master/dist) - generated logo, icon, favicon, and palette assets
 - [Organization standards](https://github.com/payloadbay/.github) - contribution, security, and repository baseline
