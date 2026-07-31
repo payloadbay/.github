@@ -16,8 +16,9 @@ Do not open a referenced document merely because it is listed here.
   [CONTRIBUTING.md](https://github.com/payloadbay/.github/blob/master/CONTRIBUTING.md).
 - For baseline synchronization, read the
   [repository baseline](https://github.com/payloadbay/.github/blob/master/REPOSITORY_BASELINE.md).
-- For security reporting or security-sensitive work, use a repository-local
-  `SECURITY.md` when present. Otherwise use the
+- For security reporting or security-sensitive work, use repository-local
+  `.github/SECURITY.md`, `SECURITY.md`, or `docs/SECURITY.md` when present.
+  Otherwise use the
   [organization default](https://github.com/payloadbay/.github/blob/master/SECURITY.md).
 
 `AGENTS.local.md` extends this baseline. It is repository-owned and is not
