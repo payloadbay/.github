@@ -12,9 +12,11 @@ Do not open a referenced document merely because it is listed here.
   work, inspect only the requested files and Git diff.
 - For code, configuration, architecture, or behavior changes, read
   `AGENTS.local.md` when it exists, then the task-relevant repository docs.
-- For contribution or pull-request process, read the applicable
-  [CONTRIBUTING.md](https://github.com/payloadbay/.github/blob/master/CONTRIBUTING.md).
-- For baseline synchronization, read the
+- For contribution or pull-request process, use repository-local
+  `.github/CONTRIBUTING.md`, `CONTRIBUTING.md`, or `docs/CONTRIBUTING.md`
+  when present. Otherwise use the
+  [organization default](https://github.com/payloadbay/.github/blob/master/CONTRIBUTING.md).
+- For baseline synchronization, read the central
   [repository baseline](https://github.com/payloadbay/.github/blob/master/REPOSITORY_BASELINE.md).
 - For security reporting or security-sensitive work, use repository-local
   `.github/SECURITY.md`, `SECURITY.md`, or `docs/SECURITY.md` when present.
