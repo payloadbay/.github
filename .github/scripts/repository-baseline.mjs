@@ -1047,7 +1047,7 @@ async function main() {
         desiredSettings,
       );
 
-      const profiles = selectRepositoryProfiles(config, repository.name);
+      let profiles = selectRepositoryProfiles(config, repository.name);
       if (profiles.length > 0 && repository.name !== sourceRepositoryName) {
         const packageContent = await getRepositoryFile(
           api,
@@ -1058,9 +1058,10 @@ async function main() {
         );
         const packageErrors = validateProfilePackage(packageContent, profiles);
         if (packageErrors.length > 0) {
-          throw new Error(
-            `profile prerequisites are missing: ${packageErrors.join("; ")}`,
+          console.log(
+            `  waiting for profile bootstrap: ${packageErrors.join("; ")}`,
           );
+          profiles = [];
         }
       }
 

@@ -32,9 +32,11 @@ package manager, quality scripts, development dependencies, and a regenerated
 lockfile. Use the central **Repository Profile Bootstrap** workflow to create
 that focused pull request. It semantically merges only missing profile package
 entries, refuses conflicts with repository-owned entries, and runs
-`bun install --lockfile-only --ignore-scripts` before opening the PR. Enroll a
-repository only after that bootstrap PR is merged; the normal baseline sync then
-applies the remaining managed files and required ruleset.
+`bun install --lockfile-only --ignore-scripts` before opening the PR. A
+repository can already be listed in a profile while its bootstrap PR is open:
+the synchronizer reports that the profile is waiting and skips its managed files
+and ruleset. Once the bootstrap PR is merged, run the normal baseline sync for
+that repository to apply the remaining managed files and required ruleset.
 
 `AGENTS.md` is a managed root-level baseline for coding agents. Repositories
 extend it through an optional root-level `AGENTS.local.md`, which remains local
