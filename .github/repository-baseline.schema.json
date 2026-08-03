@@ -96,7 +96,13 @@
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["repositories", "managedFiles", "package", "rulesets"],
+        "required": [
+          "repositories",
+          "managedFiles",
+          "package",
+          "packagePatch",
+          "rulesets"
+        ],
         "properties": {
           "repositories": {
             "type": "array",
@@ -130,6 +136,27 @@
                 "items": { "type": "string", "minLength": 1 },
                 "minItems": 1,
                 "uniqueItems": true
+              }
+            }
+          },
+          "packagePatch": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fields", "scripts", "devDependencies"],
+            "properties": {
+              "fields": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": ["string", "boolean", "number"]
+                }
+              },
+              "scripts": {
+                "type": "object",
+                "additionalProperties": { "type": "string", "minLength": 1 }
+              },
+              "devDependencies": {
+                "type": "object",
+                "additionalProperties": { "type": "string", "minLength": 1 }
               }
             }
           },

@@ -55,6 +55,7 @@ export function validateProfilePackage(packageContent, profiles) {
 
   const errors = [];
   for (const profile of profiles) {
+    const expectedPackage = profile.packagePatch;
     const packageManager = packageJson.packageManager ?? "";
     if (!packageManager.startsWith(profile.package.packageManagerPrefix)) {
       errors.push(
@@ -66,6 +67,8 @@ export function validateProfilePackage(packageContent, profiles) {
     for (const script of profile.package.requiredScripts) {
       if (typeof scripts[script] !== "string" || scripts[script].length === 0) {
         errors.push(`${profile.name}: missing package script ${script}`);
+      } else if (scripts[script] !== expectedPackage.scripts[script]) {
+        errors.push(`${profile.name}: package script ${script} does not match baseline`);
       }
     }
 
@@ -76,6 +79,18 @@ export function validateProfilePackage(packageContent, profiles) {
         dependencies[dependency].length === 0
       ) {
         errors.push(`${profile.name}: missing devDependency ${dependency}`);
+      } else if (
+        dependencies[dependency] !== expectedPackage.devDependencies[dependency]
+      ) {
+        errors.push(
+          `${profile.name}: devDependency ${dependency} does not match baseline`,
+        );
+      }
+    }
+
+    for (const [field, value] of Object.entries(expectedPackage.fields)) {
+      if (packageJson[field] !== value) {
+        errors.push(`${profile.name}: package field ${field} does not match baseline`);
       }
     }
   }

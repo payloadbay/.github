@@ -1,0 +1,104 @@
+name: Repository Profile Bootstrap
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: Repository name in the Payload Bay organization
+        required: true
+        type: string
+      profile:
+        description: Explicit baseline profile to bootstrap
+        required: true
+        default: typescript
+        type: choice
+        options:
+          - typescript
+
+permissions:
+  contents: read
+
+concurrency:
+  group: payloadbay-profile-bootstrap-${{ inputs.repository }}-${{ inputs.profile }}
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    name: Bootstrap ${{ inputs.profile }} profile
+    if: ${{ vars.PAYLOADBAY_BASELINE_APP_ID != '' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out baseline
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          path: baseline
+          persist-credentials: false
+
+      - name: Create installation token
+        id: app-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v3.2.0
+        with:
+          app-id: ${{ vars.PAYLOADBAY_BASELINE_APP_ID }}
+          private-key: ${{ secrets.PAYLOADBAY_BASELINE_APP_PRIVATE_KEY }}
+          owner: payloadbay
+
+      - name: Check out target repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: payloadbay/${{ inputs.repository }}
+          token: ${{ steps.app-token.outputs.token }}
+          path: target
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
+        with:
+          bun-version: 1.3.14
+
+      - name: Merge the profile package contract
+        run: |
+          node baseline/.github/scripts/profile-bootstrap.mjs \
+            --profile "${{ inputs.profile }}" \
+            --repository-root target
+
+      - name: Regenerate Bun lockfile without lifecycle scripts
+        working-directory: target
+        run: bun install --lockfile-only --ignore-scripts
+
+      - name: Create or update bootstrap pull request
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PROFILE: ${{ inputs.profile }}
+          REPOSITORY: ${{ inputs.repository }}
+        run: |
+          set -euo pipefail
+          branch="chore/${PROFILE}-profile-bootstrap"
+          repository="payloadbay/${REPOSITORY}"
+
+          git -C target switch -C "$branch"
+          git -C target add package.json bun.lock
+
+          if git -C target diff --cached --quiet; then
+            echo "The profile package contract and lockfile are already current."
+            exit 0
+          fi
+
+          git -C target config user.name "payload-bay-repository-baseline[bot]"
+          git -C target config user.email "4383086+payload-bay-repository-baseline[bot]@users.noreply.github.com"
+          git -C target commit -m "chore: bootstrap ${PROFILE} quality profile"
+          git -C target remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${repository}.git"
+          git -C target push --force-with-lease origin "$branch"
+
+          existing=$(gh pr list --repo "$repository" --head "payloadbay:$branch" --base master --state open --json number --jq '.[0].number')
+          if [[ -z "$existing" ]]; then
+            gh pr create --repo "$repository" --draft --base master --head "$branch" \
+              --title "chore: bootstrap ${PROFILE} quality profile" \
+              --body "Bootstraps the centrally managed ${PROFILE} profile package contract and regenerates bun.lock without lifecycle scripts. The normal repository baseline synchronizer will apply the profile-managed configuration after explicit enrollment."
+            existing=$(gh pr list --repo "$repository" --head "payloadbay:$branch" --base master --state open --json number --jq '.[0].number')
+          fi
+
+          gh pr edit "$existing" --repo "$repository" \
+            --add-label maintenance \
+            --add-label area:infrastructure \
+            --add-label quality:exempt

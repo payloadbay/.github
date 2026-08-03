@@ -13,12 +13,18 @@ on:
       - ".github/repository-baseline.schema.json"
       - ".github/scripts/repository-baseline.mjs"
       - ".github/scripts/repository-baseline.test.mjs"
+      - ".github/scripts/profile-bootstrap.mjs"
+      - ".github/scripts/profile-bootstrap.test.mjs"
       - ".github/workflows/metadata-labeler.yml"
       - ".github/workflows/planned-work-guard.yml"
       - ".github/workflows/commitlint.yml"
       - ".github/workflows/pr-quality.yml"
       - ".github/workflows/code-quality.yml"
+      - ".github/workflows/profile-bootstrap.yml"
       - ".editorconfig"
+      - "biome.json"
+      - "tsconfig.json"
+      - "vitest.config.ts"
       - ".vscode/**"
       - "fallow.toml"
       - ".github/workflows/repository-baseline.yml"
@@ -37,12 +43,18 @@ on:
       - ".github/repository-baseline.schema.json"
       - ".github/scripts/repository-baseline.mjs"
       - ".github/scripts/repository-baseline.test.mjs"
+      - ".github/scripts/profile-bootstrap.mjs"
+      - ".github/scripts/profile-bootstrap.test.mjs"
       - ".github/workflows/metadata-labeler.yml"
       - ".github/workflows/planned-work-guard.yml"
       - ".github/workflows/commitlint.yml"
       - ".github/workflows/pr-quality.yml"
       - ".github/workflows/code-quality.yml"
+      - ".github/workflows/profile-bootstrap.yml"
       - ".editorconfig"
+      - "biome.json"
+      - "tsconfig.json"
+      - "vitest.config.ts"
       - ".vscode/**"
       - "fallow.toml"
       - ".github/workflows/repository-baseline.yml"
@@ -86,7 +98,7 @@ jobs:
             renovate-config.json
 
       - name: Test baseline synchronizer
-        run: node --test .github/scripts/repository-baseline.test.mjs
+        run: node --test .github/scripts/*.test.mjs
 
   synchronize:
     name: Synchronize Repositories

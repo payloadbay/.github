@@ -59,14 +59,20 @@ test("validateProfilePackage requires the declared toolchain contract", () => {
       requiredScripts: ["lint"],
       requiredDevDependencies: ["fallow"],
     },
+    packagePatch: {
+      fields: { packageManager: "bun@1.3.14", type: "module" },
+      scripts: { lint: "biome lint ." },
+      devDependencies: { fallow: "3.12.0" },
+    },
   };
 
   assert.deepEqual(
     validateProfilePackage(
       JSON.stringify({
         packageManager: "bun@1.3.14",
+        type: "module",
         scripts: { lint: "biome lint ." },
-        devDependencies: { fallow: "3.9.0" },
+        devDependencies: { fallow: "3.12.0" },
       }),
       [profile],
     ),
@@ -78,6 +84,8 @@ test("validateProfilePackage requires the declared toolchain contract", () => {
       "typescript: packageManager must start with bun@",
       "typescript: missing package script lint",
       "typescript: missing devDependency fallow",
+      "typescript: package field packageManager does not match baseline",
+      "typescript: package field type does not match baseline",
     ],
   );
 });

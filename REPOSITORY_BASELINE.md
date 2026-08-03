@@ -29,9 +29,12 @@ The initial `typescript` profile manages its quality workflow, editor settings,
 Fallow configuration, and `baseline:typescript-quality` ruleset. Before the
 profile is synchronized, the repository must already have the declared Bun
 package manager, quality scripts, development dependencies, and a regenerated
-lockfile. This prevents the synchronizer from overwriting a repository-owned
-`package.json` or writing an invalid lockfile. Enroll a new code repository
-through its bootstrap pull request, then add it to the central profile registry.
+lockfile. Use the central **Repository Profile Bootstrap** workflow to create
+that focused pull request. It semantically merges only missing profile package
+entries, refuses conflicts with repository-owned entries, and runs
+`bun install --lockfile-only --ignore-scripts` before opening the PR. Enroll a
+repository only after that bootstrap PR is merged; the normal baseline sync then
+applies the remaining managed files and required ruleset.
 
 `AGENTS.md` is a managed root-level baseline for coding agents. Repositories
 extend it through an optional root-level `AGENTS.local.md`, which remains local
