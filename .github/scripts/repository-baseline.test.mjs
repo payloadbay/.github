@@ -12,7 +12,9 @@ import {
   planRulesetChanges,
   portableRepositorySettings,
   repositorySettingsDiffer,
+  selectRepositoryProfiles,
   selectRepositories,
+  validateProfilePackage,
 } from "./repository-baseline.mjs";
 
 test("selectRepositories excludes archived, forked, and configured repositories", () => {
@@ -28,6 +30,55 @@ test("selectRepositories excludes archived, forked, and configured repositories"
   assert.deepEqual(
     selectRepositories(repositories, config).map(({ name }) => name),
     [".github", "dashboard"],
+  );
+});
+
+test("selectRepositoryProfiles uses explicit repository enrollment", () => {
+  const config = {
+    profiles: {
+      typescript: { repositories: ["payloadbay"], managedFiles: [] },
+      other: { repositories: ["runner"], managedFiles: [] },
+    },
+  };
+
+  assert.deepEqual(selectRepositoryProfiles(config, "payloadbay"), [
+    {
+      name: "typescript",
+      repositories: ["payloadbay"],
+      managedFiles: [],
+    },
+  ]);
+  assert.deepEqual(selectRepositoryProfiles(config, "brand"), []);
+});
+
+test("validateProfilePackage requires the declared toolchain contract", () => {
+  const profile = {
+    name: "typescript",
+    package: {
+      packageManagerPrefix: "bun@",
+      requiredScripts: ["lint"],
+      requiredDevDependencies: ["fallow"],
+    },
+  };
+
+  assert.deepEqual(
+    validateProfilePackage(
+      JSON.stringify({
+        packageManager: "bun@1.3.14",
+        scripts: { lint: "biome lint ." },
+        devDependencies: { fallow: "3.9.0" },
+      }),
+      [profile],
+    ),
+    [],
+  );
+  assert.deepEqual(
+    validateProfilePackage(JSON.stringify({}), [profile]),
+    [
+      "typescript: packageManager must start with bun@",
+      "typescript: missing package script lint",
+      "typescript: missing devDependency fallow",
+    ],
   );
 });
 

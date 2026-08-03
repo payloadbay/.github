@@ -29,6 +29,82 @@
     ".github/workflows/planned-work-guard.yml",
     ".github/workflows/pr-quality.yml"
   ],
+  "profiles": {
+    "typescript": {
+      "repositories": [],
+      "managedFiles": [
+        ".editorconfig",
+        "biome.json",
+        "tsconfig.json",
+        "vitest.config.ts",
+        ".vscode/settings.json",
+        ".vscode/extensions.json",
+        ".github/workflows/code-quality.yml",
+        "fallow.toml"
+      ],
+      "package": {
+        "packageManagerPrefix": "bun@",
+        "requiredScripts": [
+          "format",
+          "format:check",
+          "lint",
+          "typecheck",
+          "test",
+          "test:coverage",
+          "analyze",
+          "analyze:audit",
+          "analyze:dupes",
+          "analyze:dead-code",
+          "analyze:health",
+          "analyze:security",
+          "quality"
+        ],
+        "requiredDevDependencies": [
+          "@biomejs/biome",
+          "@types/bun",
+          "@vitest/coverage-v8",
+          "fallow",
+          "typescript",
+          "vitest"
+        ]
+      },
+      "rulesets": [
+        {
+          "name": "baseline:typescript-quality",
+          "target": "branch",
+          "enforcement": "active",
+          "bypass_actors": [
+            {
+              "actor_id": null,
+              "actor_type": "OrganizationAdmin",
+              "bypass_mode": "always"
+            }
+          ],
+          "conditions": {
+            "ref_name": {
+              "include": ["~DEFAULT_BRANCH"],
+              "exclude": []
+            }
+          },
+          "rules": [
+            {
+              "type": "required_status_checks",
+              "parameters": {
+                "strict_required_status_checks_policy": true,
+                "do_not_enforce_on_create": false,
+                "required_status_checks": [
+                  {
+                    "context": "Code Quality",
+                    "integration_id": 15368
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
   "renovate": {
     "preset": "local>payloadbay/.github:renovate-config",
     "bootstrapPath": "renovate.json",

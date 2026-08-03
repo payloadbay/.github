@@ -19,6 +19,20 @@ repository can therefore add its own Issue Forms, workflows, labels, and
 rulesets. Repository-specific rulesets must not use the reserved `baseline:`
 prefix.
 
+## Repository profiles
+
+Profiles extend the baseline only for repositories explicitly listed in the
+central manifest. They are never inferred from a repository's file types or
+language percentage.
+
+The initial `typescript` profile manages its quality workflow, editor settings,
+Fallow configuration, and `baseline:typescript-quality` ruleset. Before the
+profile is synchronized, the repository must already have the declared Bun
+package manager, quality scripts, development dependencies, and a regenerated
+lockfile. This prevents the synchronizer from overwriting a repository-owned
+`package.json` or writing an invalid lockfile. Enroll a new code repository
+through its bootstrap pull request, then add it to the central profile registry.
+
 `AGENTS.md` is a managed root-level baseline for coding agents. Repositories
 extend it through an optional root-level `AGENTS.local.md`, which remains local
 and is never synchronized or overwritten.

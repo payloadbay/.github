@@ -52,6 +52,10 @@ not become a competing brand source of truth. Do not add automatic
 - Work from current `master` unless local guidance says otherwise.
 - Keep branches and pull requests focused. Use Conventional Commit messages and
   pull-request titles; Payload Bay uses squash merges.
+- Use `docs|feat|fix|perf|refactor|revert|test/<issue-number>-<description>`
+  for issue-backed work. `build`, `chore`, and `ci` may omit the issue number.
+  Never use `agent/...`, personal prefixes, uppercase letters, underscores, or
+  generic branch names.
 - For non-trivial work, use an existing GitHub issue or agree the intended
   outcome in an issue or Discussion before substantial implementation. Do not
   create unnecessary issues for trivial mechanical changes.

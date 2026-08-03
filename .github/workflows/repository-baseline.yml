@@ -17,6 +17,10 @@ on:
       - ".github/workflows/planned-work-guard.yml"
       - ".github/workflows/commitlint.yml"
       - ".github/workflows/pr-quality.yml"
+      - ".github/workflows/code-quality.yml"
+      - ".editorconfig"
+      - ".vscode/**"
+      - "fallow.toml"
       - ".github/workflows/repository-baseline.yml"
       - "renovate-config.json"
   push:
@@ -37,6 +41,10 @@ on:
       - ".github/workflows/planned-work-guard.yml"
       - ".github/workflows/commitlint.yml"
       - ".github/workflows/pr-quality.yml"
+      - ".github/workflows/code-quality.yml"
+      - ".editorconfig"
+      - ".vscode/**"
+      - "fallow.toml"
       - ".github/workflows/repository-baseline.yml"
       - "renovate-config.json"
   schedule:

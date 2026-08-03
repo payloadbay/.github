@@ -91,6 +91,55 @@
       "minItems": 1,
       "uniqueItems": true
     },
+    "profiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["repositories", "managedFiles", "package", "rulesets"],
+        "properties": {
+          "repositories": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "managedFiles": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "package": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "packageManagerPrefix",
+              "requiredScripts",
+              "requiredDevDependencies"
+            ],
+            "properties": {
+              "packageManagerPrefix": { "type": "string", "minLength": 1 },
+              "requiredScripts": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "requiredDevDependencies": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            }
+          },
+          "rulesets": {
+            "type": "array",
+            "items": { "type": "object" }
+          }
+        }
+      }
+    },
     "renovate": {
       "type": "object",
       "additionalProperties": false,

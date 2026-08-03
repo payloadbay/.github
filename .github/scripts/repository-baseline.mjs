@@ -35,6 +35,54 @@ export function selectRepositories(repositories, config, requestedRepository) {
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 
+export function selectRepositoryProfiles(config, repository) {
+  return Object.entries(config.profiles ?? {})
+    .filter(([, profile]) => profile.repositories.includes(repository))
+    .map(([name, profile]) => ({ name, ...profile }));
+}
+
+export function validateProfilePackage(packageContent, profiles) {
+  if (profiles.length === 0) {
+    return [];
+  }
+
+  let packageJson;
+  try {
+    packageJson = JSON.parse(packageContent ?? "");
+  } catch {
+    return ["package.json is missing or invalid JSON"];
+  }
+
+  const errors = [];
+  for (const profile of profiles) {
+    const packageManager = packageJson.packageManager ?? "";
+    if (!packageManager.startsWith(profile.package.packageManagerPrefix)) {
+      errors.push(
+        `${profile.name}: packageManager must start with ${profile.package.packageManagerPrefix}`,
+      );
+    }
+
+    const scripts = packageJson.scripts ?? {};
+    for (const script of profile.package.requiredScripts) {
+      if (typeof scripts[script] !== "string" || scripts[script].length === 0) {
+        errors.push(`${profile.name}: missing package script ${script}`);
+      }
+    }
+
+    const dependencies = packageJson.devDependencies ?? {};
+    for (const dependency of profile.package.requiredDevDependencies) {
+      if (
+        typeof dependencies[dependency] !== "string" ||
+        dependencies[dependency].length === 0
+      ) {
+        errors.push(`${profile.name}: missing devDependency ${dependency}`);
+      }
+    }
+  }
+
+  return errors;
+}
+
 export function planLabelChanges(currentLabels, desiredLabels) {
   const currentByName = new Map(
     currentLabels.map((label) => [label.name, label]),
@@ -564,12 +612,12 @@ async function synchronizeRulesets({
   api,
   owner,
   repository,
-  sourceRulesets,
+  desiredRulesets,
   prefix,
   appId,
 }) {
   const targetRulesets = await loadDetailedRulesets(api, owner, repository);
-  const plan = planRulesetChanges(sourceRulesets, targetRulesets, prefix);
+  const plan = planRulesetChanges(desiredRulesets, targetRulesets, prefix);
   const targetByName = new Map(
     targetRulesets.map((ruleset) => [ruleset.name, ruleset]),
   );
@@ -610,9 +658,13 @@ async function synchronizeRulesets({
   }
 }
 
-async function loadLocalBaseline(config) {
+async function loadLocalBaseline(config, profiles) {
   const files = new Map();
-  for (const path of config.managedFiles) {
+  const managedFiles = [
+    ...config.managedFiles,
+    ...profiles.flatMap((profile) => profile.managedFiles),
+  ];
+  for (const path of managedFiles) {
     files.set(path, await readFile(resolve(repositoryRoot, path), "utf8"));
   }
   return files;
@@ -941,7 +993,6 @@ async function main() {
     owner,
     sourceRepositoryName,
   );
-  const baselineFiles = await loadLocalBaseline(config);
   const repositories = selectRepositories(
     await api.paginate(`/orgs/${owner}/repos?type=all`),
     config,
@@ -981,6 +1032,28 @@ async function main() {
         desiredSettings,
       );
 
+      const profiles = selectRepositoryProfiles(config, repository.name);
+      if (profiles.length > 0 && repository.name !== sourceRepositoryName) {
+        const packageContent = await getRepositoryFile(
+          api,
+          owner,
+          repository.name,
+          "package.json",
+          targetBranch,
+        );
+        const packageErrors = validateProfilePackage(packageContent, profiles);
+        if (packageErrors.length > 0) {
+          throw new Error(
+            `profile prerequisites are missing: ${packageErrors.join("; ")}`,
+          );
+        }
+      }
+
+      const desiredRulesets = [
+        ...sourceRulesets,
+        ...profiles.flatMap((profile) => profile.rulesets),
+      ];
+
       if (
         repository.name !== sourceRepositoryName &&
         !(repository.private && organization.plan?.name === "free")
@@ -989,7 +1062,7 @@ async function main() {
           api,
           owner,
           repository: repository.name,
-          sourceRulesets,
+          desiredRulesets,
           prefix: config.rulesetPrefix,
           appId: process.env.BASELINE_APP_ID,
         });
@@ -1017,7 +1090,7 @@ async function main() {
         repository: repository.name,
         branch: targetBranch,
         config,
-        baselineFiles,
+        baselineFiles: await loadLocalBaseline(config, profiles),
         sourceCommit,
       });
       const renovatePlan = await planRenovateBootstrap({
