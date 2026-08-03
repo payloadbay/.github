@@ -1069,28 +1069,6 @@ async function main() {
         ...profiles.flatMap((profile) => profile.rulesets),
       ];
 
-      if (
-        repository.name !== sourceRepositoryName &&
-        !(repository.private && organization.plan?.name === "free")
-      ) {
-        await synchronizeRulesets({
-          api,
-          owner,
-          repository: repository.name,
-          desiredRulesets,
-          prefix: config.rulesetPrefix,
-          appId: process.env.BASELINE_APP_ID,
-        });
-      } else if (
-        repository.name !== sourceRepositoryName &&
-        repository.private &&
-        organization.plan?.name === "free"
-      ) {
-        console.log(
-          "  warning: rulesets are unavailable for this private repository on GitHub Free",
-        );
-      }
-
       if (repository.name === sourceRepositoryName) {
         continue;
       }
@@ -1131,6 +1109,7 @@ async function main() {
           changes,
           conflicts: filePlan.conflicts,
         });
+        continue;
       } else {
         console.log(`  direct baseline commit (${changes.length} paths)`);
         await createCommit(api, {
@@ -1140,6 +1119,21 @@ async function main() {
           changes,
           message: "chore: synchronize repository baseline",
         });
+      }
+
+      if (!(repository.private && organization.plan?.name === "free")) {
+        await synchronizeRulesets({
+          api,
+          owner,
+          repository: repository.name,
+          desiredRulesets,
+          prefix: config.rulesetPrefix,
+          appId: process.env.BASELINE_APP_ID,
+        });
+      } else {
+        console.log(
+          "  warning: rulesets are unavailable for this private repository on GitHub Free",
+        );
       }
     } catch (error) {
       failures.push({ repository: repository.name, error });
