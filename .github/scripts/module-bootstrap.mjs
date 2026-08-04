@@ -64,9 +64,9 @@ export function mergeModulePackage(packageContent, contract) {
 }
 
 async function writeModuleFiles(repositoryRoot, contract) {
-  for (const path of contract.managedFiles) {
-    const sourcePath = resolve(baselineRoot, path);
-    const targetPath = resolve(repositoryRoot, path);
+  for (const file of contract.files) {
+    const sourcePath = resolve(baselineRoot, file.source);
+    const targetPath = resolve(repositoryRoot, file.target);
     const incoming = await readFile(sourcePath, "utf8");
     let current = null;
     try {
@@ -77,7 +77,9 @@ async function writeModuleFiles(repositoryRoot, contract) {
       }
     }
     if (current !== null && current !== incoming) {
-      throw new Error(`managed file ${path} conflicts with repository-owned content`);
+      throw new Error(
+        `managed file ${file.target} conflicts with repository-owned content`,
+      );
     }
     await mkdir(dirname(targetPath), { recursive: true });
     await writeFile(targetPath, incoming);

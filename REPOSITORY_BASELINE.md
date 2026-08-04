@@ -42,15 +42,37 @@ For example, a Bun TypeScript repository can deliberately declare:
 }
 ```
 
-The central manifest defines each module's dependencies, managed files, exact
-`package.json` contract, and any module-specific rulesets. Dependencies are
-resolved automatically. The initial modules cover Bun, TypeScript, Biome,
-Vitest, Fallow, and the code-quality workflow. A repository without this
-declaration receives only the universal GitHub baseline.
+The central manifest defines each module's dependencies, source-to-target file
+mappings, exact `package.json` contract, and any module-specific rulesets.
+Module assets live beneath [`.github/modules/`](.github/modules), not at this
+repository's root. For example, the Biome module owns its Biome configuration,
+editor settings, and `.editorconfig` there, then maps them to their ordinary
+paths in an enrolled repository. Dependencies are resolved automatically.
+
+The initial modules cover Bun, TypeScript, Biome, Vitest, Fallow, and the
+code-quality workflow. A repository without this declaration receives only the
+universal GitHub baseline.
+
+### Using the module declaration
+
+1. Add or change `.github/payloadbay-baseline.json` in the repository that
+   needs the tooling. Selecting a module is deliberate; the baseline never
+   guesses the selection.
+2. Merge that declaration as a normal repository change.
+3. Run **Repository Module Bootstrap** in `payloadbay/.github`, providing the
+   repository name. It opens a draft setup PR for the selected package contract,
+   module files, and `bun.lock`.
+4. Review and merge the setup PR. The ordinary **Repository Baseline** sync
+   then maintains static module changes and activates eligible required checks.
+
+The declaration contains only module names. Module definitions and their files
+remain central. To add a future framework module such as Next.js, add its
+definition and source assets centrally, then explicitly add its name to the
+repositories that should use it.
 
 Use the central **Repository Module Bootstrap** workflow to apply a declared
 contract. It opens a focused draft pull request that adds missing package
-entries, copies the declared managed files, and regenerates `bun.lock` with
+entries, copies the declared target files, and regenerates `bun.lock` with
 `bun install --lockfile-only --ignore-scripts`. It refuses conflicts with
 repository-owned package values or managed files rather than overwriting them.
 

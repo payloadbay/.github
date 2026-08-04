@@ -4,6 +4,7 @@ import test from "node:test";
 import { mergeModulePackage } from "./module-bootstrap.mjs";
 
 const contract = {
+  files: [],
   packagePatch: {
     fields: { packageManager: "bun@1.3.14", type: "module" },
     scripts: { lint: "biome lint ." },

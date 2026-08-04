@@ -33,7 +33,7 @@
   "modules": {
     "runtime:bun": {
       "requires": [],
-      "managedFiles": [],
+      "files": [],
       "packagePatch": {
         "fields": {
           "packageManager": "bun@1.3.14",
@@ -46,7 +46,12 @@
     },
     "language:typescript": {
       "requires": ["runtime:bun"],
-      "managedFiles": ["tsconfig.json"],
+      "files": [
+        {
+          "source": ".github/modules/language-typescript/tsconfig.json",
+          "target": "tsconfig.json"
+        }
+      ],
       "packagePatch": {
         "fields": {},
         "scripts": {
@@ -61,11 +66,23 @@
     },
     "quality:biome": {
       "requires": ["runtime:bun", "language:typescript"],
-      "managedFiles": [
-        ".editorconfig",
-        "biome.json",
-        ".vscode/settings.json",
-        ".vscode/extensions.json"
+      "files": [
+        {
+          "source": ".github/modules/quality-biome/.editorconfig",
+          "target": ".editorconfig"
+        },
+        {
+          "source": ".github/modules/quality-biome/biome.json",
+          "target": "biome.json"
+        },
+        {
+          "source": ".github/modules/quality-biome/.vscode/settings.json",
+          "target": ".vscode/settings.json"
+        },
+        {
+          "source": ".github/modules/quality-biome/.vscode/extensions.json",
+          "target": ".vscode/extensions.json"
+        }
       ],
       "packagePatch": {
         "fields": {},
@@ -82,7 +99,12 @@
     },
     "testing:vitest": {
       "requires": ["runtime:bun", "language:typescript"],
-      "managedFiles": ["vitest.config.ts"],
+      "files": [
+        {
+          "source": ".github/modules/testing-vitest/vitest.config.ts",
+          "target": "vitest.config.ts"
+        }
+      ],
       "packagePatch": {
         "fields": {},
         "scripts": {
@@ -98,7 +120,12 @@
     },
     "analysis:fallow": {
       "requires": ["runtime:bun", "language:typescript", "testing:vitest"],
-      "managedFiles": ["fallow.toml"],
+      "files": [
+        {
+          "source": ".github/modules/analysis-fallow/fallow.toml",
+          "target": "fallow.toml"
+        }
+      ],
       "packagePatch": {
         "fields": {},
         "scripts": {
@@ -123,7 +150,12 @@
         "testing:vitest",
         "analysis:fallow"
       ],
-      "managedFiles": [".github/workflows/code-quality.yml"],
+      "files": [
+        {
+          "source": ".github/modules/ci-code-quality/.github/workflows/code-quality.yml",
+          "target": ".github/workflows/code-quality.yml"
+        }
+      ],
       "packagePatch": {
         "fields": {},
         "scripts": {

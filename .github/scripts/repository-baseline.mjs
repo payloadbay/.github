@@ -90,20 +90,25 @@ function mergeModuleValues(target, incoming, kind, moduleName) {
 
 export function resolveModuleContract(modules) {
   const contract = {
-    managedFiles: [],
+    files: [],
     packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
     rulesets: [],
   };
-  const managedPaths = new Set();
+  const managedTargets = new Set();
   const rulesetNames = new Set();
 
   for (const module of modules) {
-    for (const path of module.managedFiles) {
-      if (managedPaths.has(path)) {
-        throw new Error(`Conflicting managed file ${path} from repository module ${module.name}`);
+    for (const file of module.files) {
+      if (!file?.source || !file?.target) {
+        throw new Error(`Invalid file mapping in repository module ${module.name}`);
       }
-      managedPaths.add(path);
-      contract.managedFiles.push(path);
+      if (managedTargets.has(file.target)) {
+        throw new Error(
+          `Conflicting managed target ${file.target} from repository module ${module.name}`,
+        );
+      }
+      managedTargets.add(file.target);
+      contract.files.push(file);
     }
     mergeModuleValues(
       contract.packagePatch.fields,
@@ -135,7 +140,12 @@ export function resolveModuleContract(modules) {
 }
 
 export function validateModulePackage(packageContent, contract) {
-  if (contract.managedFiles.length === 0 && Object.keys(contract.packagePatch.fields).length === 0 && Object.keys(contract.packagePatch.scripts).length === 0 && Object.keys(contract.packagePatch.devDependencies).length === 0) {
+  if (
+    contract.files.length === 0 &&
+    Object.keys(contract.packagePatch.fields).length === 0 &&
+    Object.keys(contract.packagePatch.scripts).length === 0 &&
+    Object.keys(contract.packagePatch.devDependencies).length === 0
+  ) {
     return [];
   }
 
@@ -745,12 +755,14 @@ async function synchronizeRulesets({
 
 async function loadLocalBaseline(config, moduleContract) {
   const files = new Map();
-  const managedFiles = [
-    ...config.managedFiles,
-    ...moduleContract.managedFiles,
-  ];
-  for (const path of managedFiles) {
+  for (const path of config.managedFiles) {
     files.set(path, await readFile(resolve(repositoryRoot, path), "utf8"));
+  }
+  for (const file of moduleContract.files) {
+    files.set(
+      file.target,
+      await readFile(resolve(repositoryRoot, file.source), "utf8"),
+    );
   }
   return files;
 }

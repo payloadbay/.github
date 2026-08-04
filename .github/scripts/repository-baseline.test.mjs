@@ -39,13 +39,18 @@ test("resolveRepositoryModules uses an explicit repository declaration", () => {
     modules: {
       "runtime:bun": {
         requires: [],
-        managedFiles: [],
+        files: [],
         packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
         rulesets: [],
       },
       "language:typescript": {
         requires: ["runtime:bun"],
-        managedFiles: ["tsconfig.json"],
+        files: [
+          {
+            source: ".github/modules/language-typescript/tsconfig.json",
+            target: "tsconfig.json",
+          },
+        ],
         packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
         rulesets: [],
       },
@@ -67,7 +72,7 @@ test("repository modules reject unknown and circular dependencies", () => {
     modules: {
       "runtime:bun": {
         requires: ["missing"],
-        managedFiles: [],
+        files: [],
         packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
         rulesets: [],
       },
@@ -86,13 +91,13 @@ test("repository modules reject unknown and circular dependencies", () => {
     modules: {
       one: {
         requires: ["two"],
-        managedFiles: [],
+        files: [],
         packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
         rulesets: [],
       },
       two: {
         requires: ["one"],
-        managedFiles: [],
+        files: [],
         packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
         rulesets: [],
       },
@@ -114,18 +119,18 @@ test("module contracts reject incompatible managed files", () => {
       resolveModuleContract([
         {
           name: "one",
-          managedFiles: ["tooling.json"],
+          files: [{ source: "one/tooling.json", target: "tooling.json" }],
           packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
           rulesets: [],
         },
         {
           name: "two",
-          managedFiles: ["tooling.json"],
+          files: [{ source: "two/tooling.json", target: "tooling.json" }],
           packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
           rulesets: [],
         },
       ]),
-    /Conflicting managed file tooling.json from repository module two/,
+    /Conflicting managed target tooling.json from repository module two/,
   );
 });
 
@@ -133,7 +138,12 @@ test("module contracts require the declared toolchain values", () => {
   const contract = resolveModuleContract([
     {
       name: "typescript",
-      managedFiles: ["tsconfig.json"],
+      files: [
+        {
+          source: ".github/modules/language-typescript/tsconfig.json",
+          target: "tsconfig.json",
+        },
+      ],
       packagePatch: {
         fields: { packageManager: "bun@1.3.14", type: "module" },
         scripts: { lint: "biome lint ." },
