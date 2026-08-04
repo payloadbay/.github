@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { mergeProfilePackage } from "./profile-bootstrap.mjs";
+import { mergeModulePackage } from "./module-bootstrap.mjs";
 
-const profile = {
-  name: "typescript",
+const contract = {
   packagePatch: {
     fields: { packageManager: "bun@1.3.14", type: "module" },
     scripts: { lint: "biome lint ." },
@@ -12,11 +11,11 @@ const profile = {
   },
 };
 
-test("mergeProfilePackage adds missing profile values without replacing local values", () => {
+test("mergeModulePackage adds missing module values without replacing local values", () => {
   const result = JSON.parse(
-    mergeProfilePackage(
+    mergeModulePackage(
       JSON.stringify({ name: "example", scripts: { build: "bun build" } }),
-      profile,
+      contract,
     ),
   );
 
@@ -29,12 +28,12 @@ test("mergeProfilePackage adds missing profile values without replacing local va
   });
 });
 
-test("mergeProfilePackage rejects conflicts instead of overwriting local package decisions", () => {
+test("mergeModulePackage rejects conflicts instead of overwriting local package decisions", () => {
   assert.throws(
     () =>
-      mergeProfilePackage(
+      mergeModulePackage(
         JSON.stringify({ scripts: { lint: "eslint ." } }),
-        profile,
+        contract,
       ),
     /conflicts with repository-owned script lint/,
   );

@@ -11,10 +11,11 @@ import {
   planLabelChanges,
   planRulesetChanges,
   portableRepositorySettings,
+  resolveModuleContract,
+  resolveRepositoryModules,
   repositorySettingsDiffer,
-  selectRepositoryProfiles,
   selectRepositories,
-  validateProfilePackage,
+  validateModulePackage,
 } from "./repository-baseline.mjs";
 
 test("selectRepositories excludes archived, forked, and configured repositories", () => {
@@ -33,59 +34,134 @@ test("selectRepositories excludes archived, forked, and configured repositories"
   );
 });
 
-test("selectRepositoryProfiles uses explicit repository enrollment", () => {
+test("resolveRepositoryModules uses an explicit repository declaration", () => {
   const config = {
-    profiles: {
-      typescript: { repositories: ["payloadbay"], managedFiles: [] },
-      other: { repositories: ["runner"], managedFiles: [] },
-    },
-  };
-
-  assert.deepEqual(selectRepositoryProfiles(config, "payloadbay"), [
-    {
-      name: "typescript",
-      repositories: ["payloadbay"],
-      managedFiles: [],
-    },
-  ]);
-  assert.deepEqual(selectRepositoryProfiles(config, "brand"), []);
-});
-
-test("validateProfilePackage requires the declared toolchain contract", () => {
-  const profile = {
-    name: "typescript",
-    package: {
-      packageManagerPrefix: "bun@",
-      requiredScripts: ["lint"],
-      requiredDevDependencies: ["fallow"],
-    },
-    packagePatch: {
-      fields: { packageManager: "bun@1.3.14", type: "module" },
-      scripts: { lint: "biome lint ." },
-      devDependencies: { fallow: "3.12.0" },
+    modules: {
+      "runtime:bun": {
+        requires: [],
+        managedFiles: [],
+        packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
+        rulesets: [],
+      },
+      "language:typescript": {
+        requires: ["runtime:bun"],
+        managedFiles: ["tsconfig.json"],
+        packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
+        rulesets: [],
+      },
     },
   };
 
   assert.deepEqual(
-    validateProfilePackage(
+    resolveRepositoryModules(config, {
+      version: 1,
+      modules: ["language:typescript"],
+    }).map(({ name }) => name),
+    ["runtime:bun", "language:typescript"],
+  );
+  assert.deepEqual(resolveRepositoryModules(config, null), []);
+});
+
+test("repository modules reject unknown and circular dependencies", () => {
+  const unknown = {
+    modules: {
+      "runtime:bun": {
+        requires: ["missing"],
+        managedFiles: [],
+        packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
+        rulesets: [],
+      },
+    },
+  };
+  assert.throws(
+    () =>
+      resolveRepositoryModules(unknown, {
+        version: 1,
+        modules: ["runtime:bun"],
+      }),
+    /Unknown repository module: missing/,
+  );
+
+  const circular = {
+    modules: {
+      one: {
+        requires: ["two"],
+        managedFiles: [],
+        packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
+        rulesets: [],
+      },
+      two: {
+        requires: ["one"],
+        managedFiles: [],
+        packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
+        rulesets: [],
+      },
+    },
+  };
+  assert.throws(
+    () =>
+      resolveRepositoryModules(circular, {
+        version: 1,
+        modules: ["one"],
+      }),
+    /Circular repository module dependency: one/,
+  );
+});
+
+test("module contracts reject incompatible managed files", () => {
+  assert.throws(
+    () =>
+      resolveModuleContract([
+        {
+          name: "one",
+          managedFiles: ["tooling.json"],
+          packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
+          rulesets: [],
+        },
+        {
+          name: "two",
+          managedFiles: ["tooling.json"],
+          packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
+          rulesets: [],
+        },
+      ]),
+    /Conflicting managed file tooling.json from repository module two/,
+  );
+});
+
+test("module contracts require the declared toolchain values", () => {
+  const contract = resolveModuleContract([
+    {
+      name: "typescript",
+      managedFiles: ["tsconfig.json"],
+      packagePatch: {
+        fields: { packageManager: "bun@1.3.14", type: "module" },
+        scripts: { lint: "biome lint ." },
+        devDependencies: { fallow: "3.12.0" },
+      },
+      rulesets: [],
+    },
+  ]);
+
+  assert.deepEqual(
+    validateModulePackage(
       JSON.stringify({
         packageManager: "bun@1.3.14",
         type: "module",
         scripts: { lint: "biome lint ." },
         devDependencies: { fallow: "3.12.0" },
       }),
-      [profile],
+      contract,
     ),
     [],
   );
   assert.deepEqual(
-    validateProfilePackage(JSON.stringify({}), [profile]),
+    validateModulePackage(JSON.stringify({}), contract),
     [
-      "typescript: packageManager must start with bun@",
-      "typescript: missing package script lint",
-      "typescript: missing devDependency fallow",
-      "typescript: package field packageManager does not match baseline",
-      "typescript: package field type does not match baseline",
+      "package field packageManager does not match baseline",
+      "package field type does not match baseline",
+      "package script lint does not match baseline",
+      "devDependency fallow does not match baseline",
     ],
   );
 });

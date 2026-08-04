@@ -3,6 +3,7 @@
   "organization": "payloadbay",
   "sourceRepository": ".github",
   "sourceBranch": "master",
+  "moduleConfigPath": ".github/payloadbay-baseline.json",
   "rulesetPrefix": "baseline:",
   "statePath": ".github/.payloadbay-baseline.json",
   "syncBranch": "automation/repository-baseline",
@@ -29,73 +30,106 @@
     ".github/workflows/planned-work-guard.yml",
     ".github/workflows/pr-quality.yml"
   ],
-  "profiles": {
-    "typescript": {
-      "repositories": ["payloadbay"],
-      "managedFiles": [
-        ".editorconfig",
-        "biome.json",
-        "tsconfig.json",
-        "vitest.config.ts",
-        ".vscode/settings.json",
-        ".vscode/extensions.json",
-        ".github/workflows/code-quality.yml",
-        "fallow.toml"
-      ],
-      "package": {
-        "packageManagerPrefix": "bun@",
-        "requiredScripts": [
-          "format",
-          "format:check",
-          "lint",
-          "typecheck",
-          "test",
-          "test:coverage",
-          "analyze",
-          "analyze:audit",
-          "analyze:dupes",
-          "analyze:dead-code",
-          "analyze:health",
-          "analyze:security",
-          "quality"
-        ],
-        "requiredDevDependencies": [
-          "@biomejs/biome",
-          "@types/bun",
-          "@vitest/coverage-v8",
-          "fallow",
-          "typescript",
-          "vitest"
-        ]
-      },
+  "modules": {
+    "runtime:bun": {
+      "requires": [],
+      "managedFiles": [],
       "packagePatch": {
         "fields": {
           "packageManager": "bun@1.3.14",
           "type": "module"
         },
+        "scripts": {},
+        "devDependencies": {}
+      },
+      "rulesets": []
+    },
+    "language:typescript": {
+      "requires": ["runtime:bun"],
+      "managedFiles": ["tsconfig.json"],
+      "packagePatch": {
+        "fields": {},
+        "scripts": {
+          "typecheck": "tsc --noEmit"
+        },
+        "devDependencies": {
+          "@types/bun": "1.3.14",
+          "typescript": "7.0.2"
+        }
+      },
+      "rulesets": []
+    },
+    "quality:biome": {
+      "requires": ["runtime:bun", "language:typescript"],
+      "managedFiles": [
+        ".editorconfig",
+        "biome.json",
+        ".vscode/settings.json",
+        ".vscode/extensions.json"
+      ],
+      "packagePatch": {
+        "fields": {},
+        "scripts": {
+          "format": "biome format --write .",
+          "format:check": "biome format .",
+          "lint": "biome lint ."
+        },
+        "devDependencies": {
+          "@biomejs/biome": "2.5.6"
+        }
+      },
+      "rulesets": []
+    },
+    "testing:vitest": {
+      "requires": ["runtime:bun", "language:typescript"],
+      "managedFiles": ["vitest.config.ts"],
+      "packagePatch": {
+        "fields": {},
+        "scripts": {
+          "test": "vitest run",
+          "test:coverage": "vitest run --coverage"
+        },
+        "devDependencies": {
+          "@vitest/coverage-v8": "4.1.10",
+          "vitest": "4.1.10"
+        }
+      },
+      "rulesets": []
+    },
+    "analysis:fallow": {
+      "requires": ["runtime:bun", "language:typescript", "testing:vitest"],
+      "managedFiles": ["fallow.toml"],
+      "packagePatch": {
+        "fields": {},
         "scripts": {
           "analyze": "fallow --production",
           "analyze:audit": "fallow audit --production",
           "analyze:dead-code": "fallow dead-code --production",
           "analyze:dupes": "fallow dupes --production --ci",
           "analyze:health": "fallow health --production",
-          "analyze:security": "fallow security",
-          "format": "biome format --write .",
-          "format:check": "biome format .",
-          "lint": "biome lint .",
-          "quality": "bun run format:check && bun run lint && bun run typecheck && bun run test:coverage && bun run analyze:audit && bun run analyze:dupes",
-          "test": "vitest run",
-          "test:coverage": "vitest run --coverage",
-          "typecheck": "tsc --noEmit"
+          "analyze:security": "fallow security"
         },
         "devDependencies": {
-          "@biomejs/biome": "2.5.6",
-          "@types/bun": "1.3.14",
-          "@vitest/coverage-v8": "4.1.10",
-          "fallow": "3.12.0",
-          "typescript": "7.0.2",
-          "vitest": "4.1.10"
+          "fallow": "3.12.0"
         }
+      },
+      "rulesets": []
+    },
+    "ci:code-quality": {
+      "requires": [
+        "runtime:bun",
+        "language:typescript",
+        "quality:biome",
+        "testing:vitest",
+        "analysis:fallow"
+      ],
+      "managedFiles": [".github/workflows/code-quality.yml"],
+      "packagePatch": {
+        "fields": {},
+        "scripts": {
+          "quality": "bun run format:check && bun run lint && bun run typecheck && bun run test:coverage && bun run analyze:audit && bun run analyze:dupes"
+        },
+        "devDependencies": {}
       },
       "rulesets": [
         {

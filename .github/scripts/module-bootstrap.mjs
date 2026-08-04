@@ -1,17 +1,22 @@
 #!/usr/bin/env node
 
-import { readFile, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const scriptDirectory = resolve(fileURLToPath(import.meta.url), "..");
-const repositoryRoot = resolve(scriptDirectory, "../..");
+import {
+  resolveModuleContract,
+  resolveRepositoryModules,
+} from "./repository-baseline.mjs";
+
+const scriptDirectory = dirname(fileURLToPath(import.meta.url));
+const baselineRoot = resolve(scriptDirectory, "../..");
 const baselineConfigPath = resolve(
-  repositoryRoot,
+  baselineRoot,
   ".github/repository-baseline.json",
 );
 
-export function mergeProfilePackage(packageContent, profile) {
+export function mergeModulePackage(packageContent, contract) {
   let packageJson;
   try {
     packageJson = JSON.parse(packageContent);
@@ -21,7 +26,7 @@ export function mergeProfilePackage(packageContent, profile) {
 
   const next = structuredClone(packageJson);
   const conflicts = [];
-  const { fields, scripts, devDependencies } = profile.packagePatch;
+  const { fields, scripts, devDependencies } = contract.packagePatch;
 
   for (const [key, value] of Object.entries(fields)) {
     if (next[key] === undefined) {
@@ -51,50 +56,64 @@ export function mergeProfilePackage(packageContent, profile) {
 
   if (conflicts.length > 0) {
     throw new Error(
-      `profile ${profile.name} conflicts with repository-owned ${conflicts.join(", ")}`,
+      `repository module contract conflicts with repository-owned ${conflicts.join(", ")}`,
     );
   }
 
   return `${JSON.stringify(next, null, 2)}\n`;
 }
 
+async function writeModuleFiles(repositoryRoot, contract) {
+  for (const path of contract.managedFiles) {
+    const sourcePath = resolve(baselineRoot, path);
+    const targetPath = resolve(repositoryRoot, path);
+    const incoming = await readFile(sourcePath, "utf8");
+    let current = null;
+    try {
+      current = await readFile(targetPath, "utf8");
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        throw error;
+      }
+    }
+    if (current !== null && current !== incoming) {
+      throw new Error(`managed file ${path} conflicts with repository-owned content`);
+    }
+    await mkdir(dirname(targetPath), { recursive: true });
+    await writeFile(targetPath, incoming);
+  }
+}
+
 function parseArguments(arguments_) {
-  const result = { profile: null, repositoryRoot: null };
+  const result = { repositoryRoot: null };
   for (let index = 0; index < arguments_.length; index += 1) {
     const argument = arguments_[index];
-    if (argument === "--profile") {
-      result.profile = arguments_[index + 1];
-      index += 1;
-    } else if (argument === "--repository-root") {
+    if (argument === "--repository-root") {
       result.repositoryRoot = arguments_[index + 1];
       index += 1;
     } else {
       throw new Error(`Unknown argument: ${argument}`);
     }
   }
-
-  if (!result.profile || !result.repositoryRoot) {
-    throw new Error("--profile and --repository-root are required");
+  if (!result.repositoryRoot) {
+    throw new Error("--repository-root is required");
   }
-
   return result;
 }
 
 async function main() {
   const arguments_ = parseArguments(process.argv.slice(2));
   const config = JSON.parse(await readFile(baselineConfigPath, "utf8"));
-  const profile = config.profiles?.[arguments_.profile];
-  if (!profile) {
-    throw new Error(`Unknown profile: ${arguments_.profile}`);
-  }
+  const declarationPath = resolve(arguments_.repositoryRoot, config.moduleConfigPath);
+  const declaration = JSON.parse(await readFile(declarationPath, "utf8"));
+  const contract = resolveModuleContract(
+    resolveRepositoryModules(config, declaration),
+  );
 
   const packagePath = resolve(arguments_.repositoryRoot, "package.json");
-  const content = await readFile(packagePath, "utf8");
-  const merged = mergeProfilePackage(content, {
-    name: arguments_.profile,
-    ...profile,
-  });
-  await writeFile(packagePath, merged);
+  const packageContent = await readFile(packagePath, "utf8");
+  await writeFile(packagePath, mergeModulePackage(packageContent, contract));
+  await writeModuleFiles(arguments_.repositoryRoot, contract);
 }
 
 if (

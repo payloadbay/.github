@@ -1,4 +1,4 @@
-name: Repository Profile Bootstrap
+name: Repository Module Bootstrap
 
 on:
   workflow_dispatch:
@@ -7,24 +7,17 @@ on:
         description: Repository name in the Payload Bay organization
         required: true
         type: string
-      profile:
-        description: Explicit baseline profile to bootstrap
-        required: true
-        default: typescript
-        type: choice
-        options:
-          - typescript
 
 permissions:
   contents: read
 
 concurrency:
-  group: payloadbay-profile-bootstrap-${{ inputs.repository }}-${{ inputs.profile }}
+  group: payloadbay-module-bootstrap-${{ inputs.repository }}
   cancel-in-progress: false
 
 jobs:
   bootstrap:
-    name: Bootstrap ${{ inputs.profile }} profile
+    name: Bootstrap repository modules
     if: ${{ vars.PAYLOADBAY_BASELINE_APP_ID != '' }}
     runs-on: ubuntu-latest
 
@@ -56,45 +49,41 @@ jobs:
         with:
           bun-version: 1.3.14
 
-      - name: Merge the profile package contract
-        run: |
-          node baseline/.github/scripts/profile-bootstrap.mjs \
-            --profile "${{ inputs.profile }}" \
-            --repository-root target
+      - name: Apply the declared module contract
+        run: node baseline/.github/scripts/module-bootstrap.mjs --repository-root target
 
       - name: Regenerate Bun lockfile without lifecycle scripts
         working-directory: target
         run: bun install --lockfile-only --ignore-scripts
 
-      - name: Create or update bootstrap pull request
+      - name: Create or update setup pull request
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          PROFILE: ${{ inputs.profile }}
           REPOSITORY: ${{ inputs.repository }}
         run: |
           set -euo pipefail
-          branch="chore/${PROFILE}-profile-bootstrap"
+          branch="chore/apply-repository-modules"
           repository="payloadbay/${REPOSITORY}"
 
           git -C target switch -C "$branch"
-          git -C target add package.json bun.lock
+          git -C target add -A
 
           if git -C target diff --cached --quiet; then
-            echo "The profile package contract and lockfile are already current."
+            echo "The declared repository modules are already current."
             exit 0
           fi
 
           git -C target config user.name "payload-bay-repository-baseline[bot]"
           git -C target config user.email "4383086+payload-bay-repository-baseline[bot]@users.noreply.github.com"
-          git -C target commit -m "chore: bootstrap ${PROFILE} quality profile"
+          git -C target commit -m "chore: apply repository modules"
           git -C target remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${repository}.git"
           git -C target push --force-with-lease origin "$branch"
 
           existing=$(gh pr list --repo "$repository" --head "payloadbay:$branch" --base master --state open --json number --jq '.[0].number')
           if [[ -z "$existing" ]]; then
             gh pr create --repo "$repository" --draft --base master --head "$branch" \
-              --title "chore: bootstrap ${PROFILE} quality profile" \
-              --body "Bootstraps the centrally managed ${PROFILE} profile package contract and regenerates bun.lock without lifecycle scripts. The normal repository baseline synchronizer will apply the profile-managed configuration after explicit enrollment."
+              --title "chore: apply repository modules" \
+              --body "Applies the repository-owned Payload Bay module declaration, including its package contract, managed configuration files, and regenerated bun.lock."
             existing=$(gh pr list --repo "$repository" --head "payloadbay:$branch" --base master --state open --json number --jq '.[0].number')
           fi
 

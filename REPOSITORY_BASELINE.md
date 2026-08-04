@@ -19,24 +19,49 @@ repository can therefore add its own Issue Forms, workflows, labels, and
 rulesets. Repository-specific rulesets must not use the reserved `baseline:`
 prefix.
 
-## Repository profiles
+## Repository modules
 
-Profiles extend the baseline only for repositories explicitly listed in the
-central manifest. They are never inferred from a repository's file types or
-language percentage.
+Repositories opt into development tooling through a small, repository-owned
+declaration at `.github/payloadbay-baseline.json`. The synchronizer reads that
+file only from the repository's default branch. It never infers modules from a
+repository name, source files, or installed dependencies.
 
-The initial `typescript` profile manages its quality workflow, editor settings,
-Fallow configuration, and `baseline:typescript-quality` ruleset. Before the
-profile is synchronized, the repository must already have the declared Bun
-package manager, quality scripts, development dependencies, and a regenerated
-lockfile. Use the central **Repository Profile Bootstrap** workflow to create
-that focused pull request. It semantically merges only missing profile package
-entries, refuses conflicts with repository-owned entries, and runs
-`bun install --lockfile-only --ignore-scripts` before opening the PR. A
-repository can already be listed in a profile while its bootstrap PR is open:
-the synchronizer reports that the profile is waiting and skips its managed files
-and ruleset. Once the bootstrap PR is merged, run the normal baseline sync for
-that repository to apply the remaining managed files and required ruleset.
+For example, a Bun TypeScript repository can deliberately declare:
+
+```json
+{
+  "version": 1,
+  "modules": [
+    "runtime:bun",
+    "language:typescript",
+    "quality:biome",
+    "testing:vitest",
+    "analysis:fallow",
+    "ci:code-quality"
+  ]
+}
+```
+
+The central manifest defines each module's dependencies, managed files, exact
+`package.json` contract, and any module-specific rulesets. Dependencies are
+resolved automatically. The initial modules cover Bun, TypeScript, Biome,
+Vitest, Fallow, and the code-quality workflow. A repository without this
+declaration receives only the universal GitHub baseline.
+
+Use the central **Repository Module Bootstrap** workflow to apply a declared
+contract. It opens a focused draft pull request that adds missing package
+entries, copies the declared managed files, and regenerates `bun.lock` with
+`bun install --lockfile-only --ignore-scripts`. It refuses conflicts with
+repository-owned package values or managed files rather than overwriting them.
+
+After that PR merges, the normal synchronizer maintains eligible static files
+and enables the module rulesets only after their required workflow has been
+added. A module declaration is therefore an explicit request for central
+maintenance, not an automatic migration.
+
+Recipes are intentionally not part of the initial model. If several real
+repositories later use the same module combination, a recipe may be introduced
+as a short alias for that explicit list without changing module semantics.
 
 `AGENTS.md` is a managed root-level baseline for coding agents. Repositories
 extend it through an optional root-level `AGENTS.local.md`, which remains local

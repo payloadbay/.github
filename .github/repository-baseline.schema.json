@@ -6,6 +6,7 @@
     "organization",
     "sourceRepository",
     "sourceBranch",
+    "moduleConfigPath",
     "rulesetPrefix",
     "statePath",
     "syncBranch",
@@ -13,6 +14,7 @@
     "autolinks",
     "excludedRepositories",
     "managedFiles",
+    "modules",
     "renovate"
   ],
   "properties": {
@@ -28,6 +30,10 @@
       "minLength": 1
     },
     "sourceBranch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "moduleConfigPath": {
       "type": "string",
       "minLength": 1
     },
@@ -91,20 +97,19 @@
       "minItems": 1,
       "uniqueItems": true
     },
-    "profiles": {
+    "modules": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "repositories",
+          "requires",
           "managedFiles",
-          "package",
           "packagePatch",
           "rulesets"
         ],
         "properties": {
-          "repositories": {
+          "requires": {
             "type": "array",
             "items": { "type": "string", "minLength": 1 },
             "uniqueItems": true
@@ -112,32 +117,7 @@
           "managedFiles": {
             "type": "array",
             "items": { "type": "string", "minLength": 1 },
-            "minItems": 1,
             "uniqueItems": true
-          },
-          "package": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "packageManagerPrefix",
-              "requiredScripts",
-              "requiredDevDependencies"
-            ],
-            "properties": {
-              "packageManagerPrefix": { "type": "string", "minLength": 1 },
-              "requiredScripts": {
-                "type": "array",
-                "items": { "type": "string", "minLength": 1 },
-                "minItems": 1,
-                "uniqueItems": true
-              },
-              "requiredDevDependencies": {
-                "type": "array",
-                "items": { "type": "string", "minLength": 1 },
-                "minItems": 1,
-                "uniqueItems": true
-              }
-            }
           },
           "packagePatch": {
             "type": "object",
