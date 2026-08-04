@@ -176,6 +176,22 @@ test("module contracts require the declared toolchain values", () => {
   );
 });
 
+test("static-only modules do not require package.json", () => {
+  assert.deepEqual(
+    validateModulePackage(null, {
+      files: [
+        {
+          source: ".github/modules/docs/example.md",
+          target: "example.md",
+        },
+      ],
+      packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
+      rulesets: [],
+    }),
+    [],
+  );
+});
+
 test("planLabelChanges creates, updates, and preserves unmanaged labels", () => {
   const current = [
     { name: "bug", color: "ffffff", description: "old" },

@@ -141,7 +141,6 @@ export function resolveModuleContract(modules) {
 
 export function validateModulePackage(packageContent, contract) {
   if (
-    contract.files.length === 0 &&
     Object.keys(contract.packagePatch.fields).length === 0 &&
     Object.keys(contract.packagePatch.scripts).length === 0 &&
     Object.keys(contract.packagePatch.devDependencies).length === 0
@@ -176,6 +175,26 @@ export function validateModulePackage(packageContent, contract) {
   }
 
   return errors;
+}
+
+async function requestModuleApplication(
+  api,
+  owner,
+  sourceRepository,
+  sourceBranch,
+  repository,
+) {
+  console.log("  requesting module application through Repository Baseline");
+  await api.mutate(
+    `/repos/${owner}/${sourceRepository}/actions/workflows/module-bootstrap.yml/dispatches`,
+    {
+      method: "POST",
+      body: {
+        ref: sourceBranch,
+        inputs: { repository },
+      },
+    },
+  );
 }
 
 export function planLabelChanges(currentLabels, desiredLabels) {
@@ -1167,9 +1186,16 @@ async function main() {
         );
         if (packageErrors.length > 0) {
           console.log(
-            `  waiting for module bootstrap: ${packageErrors.join("; ")}`,
+            `  module package update required: ${packageErrors.join("; ")}`,
           );
-          moduleContract = resolveModuleContract([]);
+          await requestModuleApplication(
+            api,
+            owner,
+            sourceRepositoryName,
+            config.sourceBranch,
+            repository.name,
+          );
+          continue;
         }
       }
 

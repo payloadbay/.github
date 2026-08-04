@@ -1,4 +1,4 @@
-name: Repository Module Bootstrap
+name: Apply Repository Modules
 
 on:
   workflow_dispatch:
@@ -16,8 +16,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  bootstrap:
-    name: Bootstrap repository modules
+  apply:
+    name: Apply repository modules
     if: ${{ vars.PAYLOADBAY_BASELINE_APP_ID != '' }}
     runs-on: ubuntu-latest
 
@@ -56,38 +56,29 @@ jobs:
         working-directory: target
         run: bun install --lockfile-only --ignore-scripts
 
-      - name: Create or update setup pull request
+      - name: Commit the declared module contract
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           REPOSITORY: ${{ inputs.repository }}
         run: |
           set -euo pipefail
-          branch="chore/apply-repository-modules"
           repository="payloadbay/${REPOSITORY}"
 
-          git -C target switch -C "$branch"
           git -C target add -A
 
           if git -C target diff --cached --quiet; then
             echo "The declared repository modules are already current."
-            exit 0
+          else
+            git -C target config user.name "payload-bay-repository-baseline[bot]"
+            git -C target config user.email "4383086+payload-bay-repository-baseline[bot]@users.noreply.github.com"
+            git -C target commit -m "chore: synchronize repository modules"
+            git -C target remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${repository}.git"
+            git -C target push origin HEAD:master
           fi
 
-          git -C target config user.name "payload-bay-repository-baseline[bot]"
-          git -C target config user.email "4383086+payload-bay-repository-baseline[bot]@users.noreply.github.com"
-          git -C target commit -m "chore: apply repository modules"
-          git -C target remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${repository}.git"
-          git -C target push --force-with-lease origin "$branch"
-
-          existing=$(gh pr list --repo "$repository" --head "payloadbay:$branch" --base master --state open --json number --jq '.[0].number')
-          if [[ -z "$existing" ]]; then
-            gh pr create --repo "$repository" --draft --base master --head "$branch" \
-              --title "chore: apply repository modules" \
-              --body "Applies the repository-owned Payload Bay module declaration, including its package contract, managed configuration files, and regenerated bun.lock."
-            existing=$(gh pr list --repo "$repository" --head "payloadbay:$branch" --base master --state open --json number --jq '.[0].number')
-          fi
-
-          gh pr edit "$existing" --repo "$repository" \
-            --add-label maintenance \
-            --add-label area:infrastructure \
-            --add-label quality:exempt
+      - name: Finish baseline synchronization
+        env:
+          BASELINE_APP_ID: ${{ vars.PAYLOADBAY_BASELINE_APP_ID }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPOSITORY: ${{ inputs.repository }}
+        run: node baseline/.github/scripts/repository-baseline.mjs --repository "$REPOSITORY"

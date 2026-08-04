@@ -58,23 +58,27 @@ universal GitHub baseline.
 1. Add or change `.github/payloadbay-baseline.json` in the repository that
    needs the tooling. Selecting a module is deliberate; the baseline never
    guesses the selection.
-2. Merge that declaration as a normal repository change.
-3. Run **Repository Module Bootstrap** in `payloadbay/.github`, providing the
-   repository name. It opens a draft setup PR for the selected package contract,
-   module files, and `bun.lock`.
-4. Review and merge the setup PR. The ordinary **Repository Baseline** sync
-   then maintains static module changes and activates eligible required checks.
+2. Review and merge that declaration as a normal repository change. It is the
+   deliberate approval to apply the selected central contract.
+3. **Repository Baseline** detects the declaration, applies its package
+   contract and target files, and regenerates `bun.lock` with lifecycle scripts
+   disabled. Those generated baseline changes are committed directly by the
+   organization GitHub App.
+4. The same synchronization then maintains static module changes and activates
+   eligible required checks only after their workflow is present.
 
 The declaration contains only module names. Module definitions and their files
 remain central. To add a future framework module such as Next.js, add its
 definition and source assets centrally, then explicitly add its name to the
 repositories that should use it.
 
-Use the central **Repository Module Bootstrap** workflow to apply a declared
-contract. It opens a focused draft pull request that adds missing package
-entries, copies the declared target files, and regenerates `bun.lock` with
-`bun install --lockfile-only --ignore-scripts`. It refuses conflicts with
-repository-owned package values or managed files rather than overwriting them.
+When a selected module changes package metadata or needs a first lockfile,
+**Repository Baseline** internally runs the module application workflow. It
+adds only missing package entries, copies the declared target files, and
+regenerates `bun.lock` with `bun install --lockfile-only --ignore-scripts`.
+It refuses conflicts with repository-owned package values or managed files
+rather than overwriting them. The module workflow is an implementation detail;
+maintainers use **Repository Baseline** as the single entry point.
 
 After that PR merges, the normal synchronizer maintains eligible static files
 and enables the module rulesets only after their required workflow has been
