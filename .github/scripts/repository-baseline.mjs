@@ -35,6 +35,168 @@ export function selectRepositories(repositories, config, requestedRepository) {
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 
+export function resolveRepositoryModules(config, declaration) {
+  if (declaration === null) {
+    return [];
+  }
+  if (
+    !declaration ||
+    declaration.version !== 1 ||
+    !Array.isArray(declaration.modules) ||
+    declaration.modules.length === 0
+  ) {
+    throw new Error("repository module declaration must contain version 1 and modules");
+  }
+
+  const resolved = [];
+  const visited = new Set();
+  const visiting = new Set();
+  const resolveModule = (name) => {
+    const module = config.modules?.[name];
+    if (!module) {
+      throw new Error(`Unknown repository module: ${name}`);
+    }
+    if (visited.has(name)) {
+      return;
+    }
+    if (visiting.has(name)) {
+      throw new Error(`Circular repository module dependency: ${name}`);
+    }
+    visiting.add(name);
+    for (const dependency of module.requires) {
+      resolveModule(dependency);
+    }
+    visiting.delete(name);
+    visited.add(name);
+    resolved.push({ name, ...module });
+  };
+
+  for (const name of new Set(declaration.modules)) {
+    resolveModule(name);
+  }
+  return resolved;
+}
+
+function mergeModuleValues(target, incoming, kind, moduleName) {
+  for (const [key, value] of Object.entries(incoming)) {
+    if (target[key] !== undefined && target[key] !== value) {
+      throw new Error(
+        `Conflicting ${kind} ${key} from repository module ${moduleName}`,
+      );
+    }
+    target[key] = value;
+  }
+}
+
+export function resolveModuleContract(modules) {
+  const contract = {
+    files: [],
+    packagePatch: { fields: {}, scripts: {}, devDependencies: {} },
+    rulesets: [],
+  };
+  const managedTargets = new Set();
+  const rulesetNames = new Set();
+
+  for (const module of modules) {
+    for (const file of module.files) {
+      if (!file?.source || !file?.target) {
+        throw new Error(`Invalid file mapping in repository module ${module.name}`);
+      }
+      if (managedTargets.has(file.target)) {
+        throw new Error(
+          `Conflicting managed target ${file.target} from repository module ${module.name}`,
+        );
+      }
+      managedTargets.add(file.target);
+      contract.files.push(file);
+    }
+    mergeModuleValues(
+      contract.packagePatch.fields,
+      module.packagePatch.fields,
+      "package field",
+      module.name,
+    );
+    mergeModuleValues(
+      contract.packagePatch.scripts,
+      module.packagePatch.scripts,
+      "package script",
+      module.name,
+    );
+    mergeModuleValues(
+      contract.packagePatch.devDependencies,
+      module.packagePatch.devDependencies,
+      "devDependency",
+      module.name,
+    );
+    for (const ruleset of module.rulesets) {
+      if (rulesetNames.has(ruleset.name)) {
+        throw new Error(`Conflicting ruleset ${ruleset.name} from repository module ${module.name}`);
+      }
+      rulesetNames.add(ruleset.name);
+      contract.rulesets.push(ruleset);
+    }
+  }
+  return contract;
+}
+
+export function validateModulePackage(packageContent, contract) {
+  if (
+    Object.keys(contract.packagePatch.fields).length === 0 &&
+    Object.keys(contract.packagePatch.scripts).length === 0 &&
+    Object.keys(contract.packagePatch.devDependencies).length === 0
+  ) {
+    return [];
+  }
+
+  let packageJson;
+  try {
+    packageJson = JSON.parse(packageContent ?? "");
+  } catch {
+    return ["package.json is missing or invalid JSON"];
+  }
+
+  const errors = [];
+  for (const [field, value] of Object.entries(contract.packagePatch.fields)) {
+    if (packageJson[field] !== value) {
+      errors.push(`package field ${field} does not match baseline`);
+    }
+  }
+  const scripts = packageJson.scripts ?? {};
+  for (const [script, value] of Object.entries(contract.packagePatch.scripts)) {
+    if (scripts[script] !== value) {
+      errors.push(`package script ${script} does not match baseline`);
+    }
+  }
+  const dependencies = packageJson.devDependencies ?? {};
+  for (const [dependency, value] of Object.entries(contract.packagePatch.devDependencies)) {
+    if (dependencies[dependency] !== value) {
+      errors.push(`devDependency ${dependency} does not match baseline`);
+    }
+  }
+
+  return errors;
+}
+
+async function requestModuleApplication(
+  api,
+  owner,
+  sourceRepository,
+  sourceBranch,
+  repository,
+) {
+  console.log("  requesting module application through Repository Baseline");
+  await api.mutate(
+    `/repos/${owner}/${sourceRepository}/actions/workflows/module-bootstrap.yml/dispatches`,
+    {
+      method: "POST",
+      body: {
+        ref: sourceBranch,
+        inputs: { repository },
+      },
+    },
+  );
+}
+
 export function planLabelChanges(currentLabels, desiredLabels) {
   const currentByName = new Map(
     currentLabels.map((label) => [label.name, label]),
@@ -564,12 +726,12 @@ async function synchronizeRulesets({
   api,
   owner,
   repository,
-  sourceRulesets,
+  desiredRulesets,
   prefix,
   appId,
 }) {
   const targetRulesets = await loadDetailedRulesets(api, owner, repository);
-  const plan = planRulesetChanges(sourceRulesets, targetRulesets, prefix);
+  const plan = planRulesetChanges(desiredRulesets, targetRulesets, prefix);
   const targetByName = new Map(
     targetRulesets.map((ruleset) => [ruleset.name, ruleset]),
   );
@@ -610,10 +772,16 @@ async function synchronizeRulesets({
   }
 }
 
-async function loadLocalBaseline(config) {
+async function loadLocalBaseline(config, moduleContract) {
   const files = new Map();
   for (const path of config.managedFiles) {
     files.set(path, await readFile(resolve(repositoryRoot, path), "utf8"));
+  }
+  for (const file of moduleContract.files) {
+    files.set(
+      file.target,
+      await readFile(resolve(repositoryRoot, file.source), "utf8"),
+    );
   }
   return files;
 }
@@ -941,7 +1109,6 @@ async function main() {
     owner,
     sourceRepositoryName,
   );
-  const baselineFiles = await loadLocalBaseline(config);
   const repositories = selectRepositories(
     await api.paginate(`/orgs/${owner}/repos?type=all`),
     config,
@@ -981,28 +1148,6 @@ async function main() {
         desiredSettings,
       );
 
-      if (
-        repository.name !== sourceRepositoryName &&
-        !(repository.private && organization.plan?.name === "free")
-      ) {
-        await synchronizeRulesets({
-          api,
-          owner,
-          repository: repository.name,
-          sourceRulesets,
-          prefix: config.rulesetPrefix,
-          appId: process.env.BASELINE_APP_ID,
-        });
-      } else if (
-        repository.name !== sourceRepositoryName &&
-        repository.private &&
-        organization.plan?.name === "free"
-      ) {
-        console.log(
-          "  warning: rulesets are unavailable for this private repository on GitHub Free",
-        );
-      }
-
       if (repository.name === sourceRepositoryName) {
         continue;
       }
@@ -1011,13 +1156,61 @@ async function main() {
         continue;
       }
 
+      const declarationContent = await getRepositoryFile(
+        api,
+        owner,
+        repository.name,
+        config.moduleConfigPath,
+        targetBranch,
+      );
+      let moduleContract = resolveModuleContract([]);
+      if (declarationContent !== null) {
+        let declaration;
+        try {
+          declaration = JSON.parse(declarationContent);
+        } catch {
+          throw new Error(`${config.moduleConfigPath} is invalid JSON`);
+        }
+        const modules = resolveRepositoryModules(config, declaration);
+        moduleContract = resolveModuleContract(modules);
+        const packageContent = await getRepositoryFile(
+          api,
+          owner,
+          repository.name,
+          "package.json",
+          targetBranch,
+        );
+        const packageErrors = validateModulePackage(
+          packageContent,
+          moduleContract,
+        );
+        if (packageErrors.length > 0) {
+          console.log(
+            `  module package update required: ${packageErrors.join("; ")}`,
+          );
+          await requestModuleApplication(
+            api,
+            owner,
+            sourceRepositoryName,
+            config.sourceBranch,
+            repository.name,
+          );
+          continue;
+        }
+      }
+
+      const desiredRulesets = [
+        ...sourceRulesets,
+        ...moduleContract.rulesets,
+      ];
+
       const filePlan = await planFileSynchronization({
         api,
         owner,
         repository: repository.name,
         branch: targetBranch,
         config,
-        baselineFiles,
+        baselineFiles: await loadLocalBaseline(config, moduleContract),
         sourceCommit,
       });
       const renovatePlan = await planRenovateBootstrap({
@@ -1043,6 +1236,7 @@ async function main() {
           changes,
           conflicts: filePlan.conflicts,
         });
+        continue;
       } else {
         console.log(`  direct baseline commit (${changes.length} paths)`);
         await createCommit(api, {
@@ -1052,6 +1246,21 @@ async function main() {
           changes,
           message: "chore: synchronize repository baseline",
         });
+      }
+
+      if (!(repository.private && organization.plan?.name === "free")) {
+        await synchronizeRulesets({
+          api,
+          owner,
+          repository: repository.name,
+          desiredRulesets,
+          prefix: config.rulesetPrefix,
+          appId: process.env.BASELINE_APP_ID,
+        });
+      } else {
+        console.log(
+          "  warning: rulesets are unavailable for this private repository on GitHub Free",
+        );
       }
     } catch (error) {
       failures.push({ repository: repository.name, error });

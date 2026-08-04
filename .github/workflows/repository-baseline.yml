@@ -13,10 +13,14 @@ on:
       - ".github/repository-baseline.schema.json"
       - ".github/scripts/repository-baseline.mjs"
       - ".github/scripts/repository-baseline.test.mjs"
+      - ".github/scripts/module-bootstrap.mjs"
+      - ".github/scripts/module-bootstrap.test.mjs"
       - ".github/workflows/metadata-labeler.yml"
       - ".github/workflows/planned-work-guard.yml"
       - ".github/workflows/commitlint.yml"
       - ".github/workflows/pr-quality.yml"
+      - ".github/modules/**"
+      - ".github/workflows/module-bootstrap.yml"
       - ".github/workflows/repository-baseline.yml"
       - "renovate-config.json"
   push:
@@ -33,10 +37,14 @@ on:
       - ".github/repository-baseline.schema.json"
       - ".github/scripts/repository-baseline.mjs"
       - ".github/scripts/repository-baseline.test.mjs"
+      - ".github/scripts/module-bootstrap.mjs"
+      - ".github/scripts/module-bootstrap.test.mjs"
       - ".github/workflows/metadata-labeler.yml"
       - ".github/workflows/planned-work-guard.yml"
       - ".github/workflows/commitlint.yml"
       - ".github/workflows/pr-quality.yml"
+      - ".github/modules/**"
+      - ".github/workflows/module-bootstrap.yml"
       - ".github/workflows/repository-baseline.yml"
       - "renovate-config.json"
   schedule:
@@ -78,7 +86,7 @@ jobs:
             renovate-config.json
 
       - name: Test baseline synchronizer
-        run: node --test .github/scripts/repository-baseline.test.mjs
+        run: node --test .github/scripts/*.test.mjs
 
   synchronize:
     name: Synchronize Repositories

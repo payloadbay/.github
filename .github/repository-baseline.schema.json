@@ -6,6 +6,7 @@
     "organization",
     "sourceRepository",
     "sourceBranch",
+    "moduleConfigPath",
     "rulesetPrefix",
     "statePath",
     "syncBranch",
@@ -13,6 +14,7 @@
     "autolinks",
     "excludedRepositories",
     "managedFiles",
+    "modules",
     "renovate"
   ],
   "properties": {
@@ -28,6 +30,10 @@
       "minLength": 1
     },
     "sourceBranch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "moduleConfigPath": {
       "type": "string",
       "minLength": 1
     },
@@ -90,6 +96,64 @@
       },
       "minItems": 1,
       "uniqueItems": true
+    },
+    "modules": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "requires",
+          "files",
+          "packagePatch",
+          "rulesets"
+        ],
+        "properties": {
+          "requires": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "target"],
+              "properties": {
+                "source": { "type": "string", "minLength": 1 },
+                "target": { "type": "string", "minLength": 1 }
+              }
+            },
+            "uniqueItems": true
+          },
+          "packagePatch": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fields", "scripts", "devDependencies"],
+            "properties": {
+              "fields": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": ["string", "boolean", "number"]
+                }
+              },
+              "scripts": {
+                "type": "object",
+                "additionalProperties": { "type": "string", "minLength": 1 }
+              },
+              "devDependencies": {
+                "type": "object",
+                "additionalProperties": { "type": "string", "minLength": 1 }
+              }
+            }
+          },
+          "rulesets": {
+            "type": "array",
+            "items": { "type": "object" }
+          }
+        }
+      }
     },
     "renovate": {
       "type": "object",

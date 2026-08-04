@@ -19,6 +19,76 @@ repository can therefore add its own Issue Forms, workflows, labels, and
 rulesets. Repository-specific rulesets must not use the reserved `baseline:`
 prefix.
 
+## Repository modules
+
+Repositories opt into development tooling through a small, repository-owned
+declaration at `.github/payloadbay-baseline.json`. The synchronizer reads that
+file only from the repository's default branch. It never infers modules from a
+repository name, source files, or installed dependencies.
+
+For example, a Bun TypeScript repository can deliberately declare:
+
+```json
+{
+  "version": 1,
+  "modules": [
+    "runtime:bun",
+    "language:typescript",
+    "quality:biome",
+    "testing:vitest",
+    "analysis:fallow",
+    "ci:code-quality"
+  ]
+}
+```
+
+The central manifest defines each module's dependencies, source-to-target file
+mappings, exact `package.json` contract, and any module-specific rulesets.
+Module assets live beneath [`.github/modules/`](.github/modules), not at this
+repository's root. For example, the Biome module owns its Biome configuration,
+editor settings, and `.editorconfig` there, then maps them to their ordinary
+paths in an enrolled repository. Dependencies are resolved automatically.
+
+The initial modules cover Bun, TypeScript, Biome, Vitest, Fallow, and the
+code-quality workflow. A repository without this declaration receives only the
+universal GitHub baseline.
+
+### Using the module declaration
+
+1. Add or change `.github/payloadbay-baseline.json` in the repository that
+   needs the tooling. Selecting a module is deliberate; the baseline never
+   guesses the selection.
+2. Review and merge that declaration as a normal repository change. It is the
+   deliberate approval to apply the selected central contract.
+3. **Repository Baseline** detects the declaration, applies its package
+   contract and target files, and regenerates `bun.lock` with lifecycle scripts
+   disabled. Those generated baseline changes are committed directly by the
+   organization GitHub App.
+4. The same synchronization then maintains static module changes and activates
+   eligible required checks only after their workflow is present.
+
+The declaration contains only module names. Module definitions and their files
+remain central. To add a future framework module such as Next.js, add its
+definition and source assets centrally, then explicitly add its name to the
+repositories that should use it.
+
+When a selected module changes package metadata or needs a first lockfile,
+**Repository Baseline** internally runs the module application workflow. It
+adds only missing package entries, copies the declared target files, and
+regenerates `bun.lock` with `bun install --lockfile-only --ignore-scripts`.
+It refuses conflicts with repository-owned package values or managed files
+rather than overwriting them. The module workflow is an implementation detail;
+maintainers use **Repository Baseline** as the single entry point.
+
+After that PR merges, the normal synchronizer maintains eligible static files
+and enables the module rulesets only after their required workflow has been
+added. A module declaration is therefore an explicit request for central
+maintenance, not an automatic migration.
+
+Recipes are intentionally not part of the initial model. If several real
+repositories later use the same module combination, a recipe may be introduced
+as a short alias for that explicit list without changing module semantics.
+
 `AGENTS.md` is a managed root-level baseline for coding agents. Repositories
 extend it through an optional root-level `AGENTS.local.md`, which remains local
 and is never synchronized or overwritten.
