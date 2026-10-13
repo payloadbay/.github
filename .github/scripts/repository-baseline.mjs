@@ -21,6 +21,17 @@ export function hashContent(content) {
   return createHash("sha256").update(content).digest("hex");
 }
 
+export function selectManagedFilePaths(config, repositoryName) {
+  return [
+    ...new Set([
+      ...config.managedFiles,
+      ...(config.managedFileGroups ?? [])
+        .filter((group) => group.repositories.includes(repositoryName))
+        .flatMap((group) => group.files),
+    ]),
+  ];
+}
+
 export function selectRepositories(repositories, config, requestedRepository) {
   const excluded = new Set(config.excludedRepositories);
 
@@ -612,7 +623,11 @@ async function synchronizeRulesets({
 
 async function loadLocalBaseline(config) {
   const files = new Map();
-  for (const path of config.managedFiles) {
+  const paths = new Set([
+    ...config.managedFiles,
+    ...(config.managedFileGroups ?? []).flatMap((group) => group.files),
+  ]);
+  for (const path of paths) {
     files.set(path, await readFile(resolve(repositoryRoot, path), "utf8"));
   }
   return files;
@@ -654,7 +669,7 @@ function parseState(content) {
   return state;
 }
 
-async function planFileSynchronization({
+export async function planFileSynchronization({
   api,
   owner,
   repository,
@@ -1017,7 +1032,12 @@ async function main() {
         repository: repository.name,
         branch: targetBranch,
         config,
-        baselineFiles,
+        baselineFiles: new Map(
+          selectManagedFilePaths(config, repository.name).map((path) => [
+            path,
+            baselineFiles.get(path),
+          ]),
+        ),
         sourceCommit,
       });
       const renovatePlan = await planRenovateBootstrap({

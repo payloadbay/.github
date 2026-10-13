@@ -8,12 +8,81 @@ import {
   mergeManagedFile,
   normalizeRuleset,
   planAutolinkChanges,
+  planFileSynchronization,
   planLabelChanges,
   planRulesetChanges,
   portableRepositorySettings,
   repositorySettingsDiffer,
   selectRepositories,
+  selectManagedFilePaths,
 } from "./repository-baseline.mjs";
+
+test("shared SpecKit files reach only explicitly eligible repositories", () => {
+  const config = {
+    managedFiles: ["AGENTS.md"],
+    managedFileGroups: [{
+      name: "speckit",
+      repositories: ["payloadbay"],
+      files: [".github/speckit/setup.json"],
+    }],
+  };
+  assert.deepEqual(selectManagedFilePaths(config, "payloadbay"), [
+    "AGENTS.md", ".github/speckit/setup.json",
+  ]);
+  for (const repository of ["brand", ".github", "future-product", "payloadbay-fork"]) {
+    assert.deepEqual(selectManagedFilePaths(config, repository), ["AGENTS.md"]);
+  }
+  assert.deepEqual(selectManagedFilePaths({ managedFiles: ["AGENTS.md"] }, "payloadbay"), ["AGENTS.md"]);
+});
+
+function fileApi(files) {
+  const reads = [];
+  return {
+    reads,
+    async request(endpoint) {
+      const path = endpoint.split("/contents/")[1].split("?ref=")[0];
+      reads.push(path);
+      const content = files.get(path);
+      return content === undefined ? null : {
+        type: "file", content: Buffer.from(content).toString("base64"),
+      };
+    },
+  };
+}
+
+test("preset synchronization does not inspect or overwrite project SpecKit content", async () => {
+  const path = ".github/speckit/setup.json";
+  const api = fileApi(new Map([
+    [".specify/memory/constitution.md", "Project constitution"],
+    ["specs/001-delivery/spec.md", "Project feature"],
+  ]));
+  const plan = await planFileSynchronization({
+    api, owner: "payloadbay", repository: "payloadbay", branch: "master",
+    config: { statePath: ".github/.payloadbay-baseline.json", autolinks: [] },
+    baselineFiles: new Map([[path, "shared setup"]]), sourceCommit: "source-sha",
+  });
+  assert.deepEqual(plan.conflicts, []);
+  assert.deepEqual(plan.changes.map(({ path }) => path), [path, ".github/.payloadbay-baseline.json"]);
+  assert.deepEqual(api.reads, [".github/.payloadbay-baseline.json", path]);
+});
+
+test("removing eligibility uses normal deletion and conflict handling for shared assets", async () => {
+  const path = ".github/speckit/setup.json";
+  const statePath = ".github/.payloadbay-baseline.json";
+  const state = JSON.stringify({
+    schemaVersion: 2, autolinks: [],
+    files: { [path]: { hash: hashContent("shared"), content: Buffer.from("shared").toString("base64") } },
+  });
+  for (const [current, conflicts] of [["shared", []], ["local edit", [path]]]) {
+    const api = fileApi(new Map([[statePath, state], [path, current]]));
+    const plan = await planFileSynchronization({
+      api, owner: "payloadbay", repository: "payloadbay", branch: "master",
+      config: { statePath, autolinks: [] }, baselineFiles: new Map(), sourceCommit: "source-sha",
+    });
+    assert.deepEqual(plan.conflicts, conflicts);
+    assert.deepEqual(plan.changes[0], { path, content: null });
+  }
+});
 
 test("selectRepositories excludes archived, forked, and configured repositories", () => {
   const repositories = [

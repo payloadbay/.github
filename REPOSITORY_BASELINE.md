@@ -19,6 +19,27 @@ repository can therefore add its own Issue Forms, workflows, labels, and
 rulesets. Repository-specific rulesets must not use the reserved `baseline:`
 prefix.
 
+### Eligible SpecKit repositories
+
+`managedFiles` applies universally. Optional `managedFileGroups` add explicitly
+listed paths only to repository names in each group's `repositories` list. They
+use the same source and target paths and the existing three-way merge, conflict
+PR, state tracking and deletion behavior. Names are exact, not patterns or
+automatic stack detection. The `speckit` group initially includes only
+`payloadbay`; `.github` keeps the source assets and `brand` receives no SpecKit files.
+
+The group distributes `.github/speckit/` source: the Payload Bay preset, setup
+pins and [initialization guide](.github/speckit/README.md). Each eligible project
+runs SpecKit initialization and preset installation separately. The workflow does
+not execute SpecKit, install packages or maintain product lockfiles.
+
+Project constitutions, TDD profiles, feature specs, registry/feature state and
+generated agent files are outside the synchronized set. A source update requires
+an explicit project-local preset refresh to regenerate agent workflows. New
+eligibility or shared asset paths are reviewed changes to the central manifest.
+Removing eligibility removes unchanged previously managed assets; local edits
+produce a conflict PR. It does not uninstall the project's installed preset.
+
 `AGENTS.md` is a managed root-level baseline for coding agents. Repositories
 extend it through an optional root-level `AGENTS.local.md`, which remains local
 and is never synchronized or overwritten.

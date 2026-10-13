@@ -29,6 +29,28 @@
     ".github/workflows/planned-work-guard.yml",
     ".github/workflows/pr-quality.yml"
   ],
+  "managedFileGroups": [
+    {
+      "name": "speckit",
+      "repositories": ["payloadbay"],
+      "files": [
+        ".github/speckit/README.md",
+        ".github/speckit/setup.json",
+        ".github/speckit/presets/payloadbay/preset.yml",
+        ".github/speckit/presets/payloadbay/LICENSE",
+        ".github/speckit/presets/payloadbay/templates/constitution-addendum.md",
+        ".github/speckit/presets/payloadbay/templates/spec-addendum.md",
+        ".github/speckit/presets/payloadbay/templates/plan-addendum.md",
+        ".github/speckit/presets/payloadbay/templates/tasks-addendum.md",
+        ".github/speckit/presets/payloadbay/commands/speckit.constitution.md",
+        ".github/speckit/presets/payloadbay/commands/speckit.specify.md",
+        ".github/speckit/presets/payloadbay/commands/speckit.plan.md",
+        ".github/speckit/presets/payloadbay/commands/speckit.tasks.md",
+        ".github/speckit/presets/payloadbay/commands/speckit.implement.md",
+        ".github/speckit/presets/payloadbay/commands/speckit.analyze.md"
+      ]
+    }
+  ],
   "renovate": {
     "preset": "local>payloadbay/.github:renovate-config",
     "bootstrapPath": "renovate.json",

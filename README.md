@@ -12,6 +12,7 @@ It is not the Payload Bay application source repository. Product code and reposi
 - pull request quality and commit conventions;
 - the repository-baseline synchronizer;
 - the shared Renovate preset;
+- the [Payload Bay SpecKit preset and setup](.github/speckit/README.md);
 - the public organization profile in [`profile/README.md`](profile/README.md).
 
 ## Repository baseline

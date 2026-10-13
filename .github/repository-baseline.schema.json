@@ -91,6 +91,28 @@
       "minItems": 1,
       "uniqueItems": true
     },
+    "managedFileGroups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "repositories", "files"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "repositories": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "files": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        }
+      }
+    },
     "renovate": {
       "type": "object",
       "additionalProperties": false,
