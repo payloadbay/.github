@@ -13,6 +13,8 @@ on:
       - ".github/repository-baseline.schema.json"
       - ".github/scripts/repository-baseline.mjs"
       - ".github/scripts/repository-baseline.test.mjs"
+      - ".github/scripts/test-speckit.py"
+      - ".github/speckit/**"
       - ".github/workflows/metadata-labeler.yml"
       - ".github/workflows/planned-work-guard.yml"
       - ".github/workflows/commitlint.yml"
@@ -33,6 +35,8 @@ on:
       - ".github/repository-baseline.schema.json"
       - ".github/scripts/repository-baseline.mjs"
       - ".github/scripts/repository-baseline.test.mjs"
+      - ".github/scripts/test-speckit.py"
+      - ".github/speckit/**"
       - ".github/workflows/metadata-labeler.yml"
       - ".github/workflows/planned-work-guard.yml"
       - ".github/workflows/commitlint.yml"
@@ -79,6 +83,18 @@ jobs:
 
       - name: Test baseline synchronizer
         run: node --test .github/scripts/repository-baseline.test.mjs
+
+      - name: Install pinned SpecKit for preset validation
+        run: |
+          python3 -m venv "$RUNNER_TEMP/speckit-validation"
+          "$RUNNER_TEMP/speckit-validation/bin/python" -m pip install \
+            "specify-cli==$(python3 -c 'import json; print(json.load(open(".github/speckit/setup.json"))["specifyVersion"])')" \
+            "PyYAML==$(python3 -c 'import json; print(json.load(open(".github/speckit/setup.json"))["pythonDependencies"]["PyYAML"])')"
+
+      - name: Validate preset installation and Python integrations
+        env:
+          SPECIFY_EXECUTABLE: ${{ runner.temp }}/speckit-validation/bin/specify
+        run: '"$RUNNER_TEMP/speckit-validation/bin/python" .github/scripts/test-speckit.py'
 
   synchronize:
     name: Synchronize Repositories
