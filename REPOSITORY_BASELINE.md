@@ -44,6 +44,21 @@ produce a conflict PR. It does not uninstall the project's installed preset.
 extend it through an optional root-level `AGENTS.local.md`, which remains local
 and is never synchronized or overwritten.
 
+### Eligible TypeScript repositories
+
+The optional `typescript` group distributes [shared formatting assets](.github/tooling/README.md)
+to explicitly listed repositories, initially only `payloadbay`. It includes a
+framework-independent ESLint readability preset and a Prettier base matching the
+approved Clipify settings. The existing sync merge, deletion, conflict-PR and
+state tracking behavior applies unchanged.
+
+Projects import these assets from their own ESLint and Prettier configurations.
+The workflow does not overwrite those configurations, install dependencies,
+format project files, or maintain TypeScript aliases. Next.js rules, workspace
+boundaries, test exceptions, editor settings and migration policies remain
+project-owned. Brand receives no JavaScript tooling. Review exact eligibility
+and asset paths in the central manifest before adding another repository.
+
 Community health files such as `CONTRIBUTING.md`, `SUPPORT.md`, `SECURITY.md`,
 and the organization profile live in this repository as GitHub's organization
 defaults. They apply when a public repository does not provide its own file and

@@ -49,6 +49,16 @@
         ".github/speckit/presets/payloadbay/commands/speckit.implement.md",
         ".github/speckit/presets/payloadbay/commands/speckit.analyze.md"
       ]
+    },
+    {
+      "name": "typescript",
+      "repositories": ["payloadbay"],
+      "files": [
+        ".github/tooling/README.md",
+        ".github/tooling/eslint/base.mjs",
+        ".github/tooling/eslint/readability.mjs",
+        ".github/tooling/prettier/base.mjs"
+      ]
     }
   ],
   "renovate": {
