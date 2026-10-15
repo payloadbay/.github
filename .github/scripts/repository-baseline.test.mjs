@@ -199,12 +199,18 @@ test("portableRepositorySettings includes only the merge baseline", () => {
     delete_branch_on_merge: true,
     allow_update_branch: true,
     squash_merge_commit_title: "PR_TITLE",
-    squash_merge_commit_message: "PR_BODY",
+    squash_merge_commit_message: "BLANK",
     description: "must not be copied",
   };
 
   const settings = portableRepositorySettings(source);
   assert.equal(settings.default_branch, "master");
+  assert.equal(settings.squash_merge_commit_title, "PR_TITLE");
+  assert.equal(settings.squash_merge_commit_message, "BLANK");
+  assert.equal(
+    repositorySettingsDiffer({ ...source, squash_merge_commit_message: "PR_BODY" }, settings),
+    true,
+  );
   assert.equal(settings.description, undefined);
   assert.equal(repositorySettingsDiffer(source, settings), false);
   assert.equal(

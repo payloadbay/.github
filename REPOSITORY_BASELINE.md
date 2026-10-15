@@ -137,6 +137,16 @@ Configure shared merge behavior on the `.github` repository. The synchronizer
 copies only the allow/deny merge methods, squash format, default branch,
 automatic branch deletion, auto-merge, and update-branch settings.
 
+Set the source repository squash defaults to `PR_TITLE` for
+`squash_merge_commit_title` and `BLANK` for `squash_merge_commit_message`
+(GitHub UI: **Pull request title**). The existing PR-title check validates the
+default final subject. Do not copy the PR description into the commit: Markdown,
+issue references and review checklists are not Conventional Commit footers.
+This applies equally to maintainer and external-contributor PRs. If a maintainer
+overrides the merge message, validate that exact message before merging;
+repository defaults do not prevent manual overrides. Keep commitlint rules
+enabled for both branch commits and resulting default-branch commits.
+
 Create shared rulesets on `.github` with the `baseline:` prefix. The initial
 ruleset is `baseline:default-branch`. Rulesets with that prefix are created,
 updated, and removed in target repositories to match `.github`. Other rulesets
