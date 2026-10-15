@@ -15,6 +15,8 @@ on:
       - ".github/scripts/repository-baseline.test.mjs"
       - ".github/scripts/test-speckit.py"
       - ".github/speckit/**"
+      - ".github/tooling/**"
+      - ".github/scripts/tooling.test.mjs"
       - ".github/workflows/metadata-labeler.yml"
       - ".github/workflows/planned-work-guard.yml"
       - ".github/workflows/commitlint.yml"
@@ -37,6 +39,8 @@ on:
       - ".github/scripts/repository-baseline.test.mjs"
       - ".github/scripts/test-speckit.py"
       - ".github/speckit/**"
+      - ".github/tooling/**"
+      - ".github/scripts/tooling.test.mjs"
       - ".github/workflows/metadata-labeler.yml"
       - ".github/workflows/planned-work-guard.yml"
       - ".github/workflows/commitlint.yml"
@@ -83,6 +87,14 @@ jobs:
 
       - name: Test baseline synchronizer
         run: node --test .github/scripts/repository-baseline.test.mjs
+
+      - name: Validate shared formatting presets
+        env:
+          PAYLOADBAY_TOOLING_MODULES: ${{ runner.temp }}/payloadbay-tooling/package.json
+        run: |
+          npm install --prefix "$RUNNER_TEMP/payloadbay-tooling" --ignore-scripts --no-package-lock \
+            eslint@9.39.5 @typescript-eslint/parser@8.71.2 typescript@5.9.3 prettier@3.9.9
+          node --test .github/scripts/tooling.test.mjs
 
       - name: Install pinned SpecKit for preset validation
         run: |
