@@ -13,7 +13,8 @@
     "autolinks",
     "excludedRepositories",
     "managedFiles",
-    "renovate"
+    "renovate",
+    "repositorySettings"
   ],
   "properties": {
     "$schema": {
@@ -57,7 +58,11 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["keyPrefix", "urlTemplate", "isAlphanumeric"],
+        "required": [
+          "keyPrefix",
+          "urlTemplate",
+          "isAlphanumeric"
+        ],
         "properties": {
           "keyPrefix": {
             "type": "string",
@@ -96,17 +101,30 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "repositories", "files"],
+        "required": [
+          "name",
+          "repositories",
+          "files"
+        ],
         "properties": {
-          "name": { "type": "string", "minLength": 1 },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
           "repositories": {
             "type": "array",
-            "items": { "type": "string", "minLength": 1 },
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
             "uniqueItems": true
           },
           "files": {
             "type": "array",
-            "items": { "type": "string", "minLength": 1 },
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
             "minItems": 1,
             "uniqueItems": true
           }
@@ -116,7 +134,11 @@
     "renovate": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["preset", "bootstrapPath", "configPaths"],
+      "required": [
+        "preset",
+        "bootstrapPath",
+        "configPaths"
+      ],
       "properties": {
         "preset": {
           "type": "string",
@@ -134,6 +156,55 @@
           },
           "minItems": 1,
           "uniqueItems": true
+        }
+      }
+    },
+    "repositorySettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "default_branch",
+        "allow_squash_merge",
+        "allow_merge_commit",
+        "allow_rebase_merge",
+        "allow_auto_merge",
+        "delete_branch_on_merge",
+        "allow_update_branch",
+        "squash_merge_commit_title",
+        "squash_merge_commit_message"
+      ],
+      "properties": {
+        "allow_squash_merge": {
+          "type": "boolean"
+        },
+        "allow_merge_commit": {
+          "type": "boolean"
+        },
+        "allow_rebase_merge": {
+          "type": "boolean"
+        },
+        "allow_auto_merge": {
+          "type": "boolean"
+        },
+        "delete_branch_on_merge": {
+          "type": "boolean"
+        },
+        "allow_update_branch": {
+          "type": "boolean"
+        },
+        "default_branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "squash_merge_commit_title": {
+          "enum": [
+            "PR_TITLE"
+          ]
+        },
+        "squash_merge_commit_message": {
+          "enum": [
+            "BLANK"
+          ]
         }
       }
     }
