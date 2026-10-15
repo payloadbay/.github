@@ -10,7 +10,7 @@ The baseline synchronizer manages these shared configuration categories:
 
 - paths listed in [`.github/repository-baseline.json`](.github/repository-baseline.json);
 - labels declared in [`.github/labels.json`](.github/labels.json);
-- selected merge settings read from the live `.github` repository settings;
+- merge settings declared in `repositorySettings` in the baseline manifest;
 - repository rulesets whose names start with `baseline:`;
 - repository autolinks in the prefixes reserved by the baseline manifest.
 
@@ -133,11 +133,12 @@ The workflow remains validation-only until the App ID variable exists.
 
 ## Rulesets and merge settings
 
-Configure shared merge behavior on the `.github` repository. The synchronizer
-copies only the allow/deny merge methods, squash format, default branch,
+Declare shared merge behavior in `.github/repository-baseline.json` under
+`repositorySettings`. Live repository settings are inspected for drift, not used
+as policy input. The synchronizer applies the allow/deny merge methods, squash format, default branch,
 automatic branch deletion, auto-merge, and update-branch settings.
 
-Set the source repository squash defaults to `PR_TITLE` for
+Set the manifest squash defaults to `PR_TITLE` for
 `squash_merge_commit_title` and `BLANK` for `squash_merge_commit_message`
 (GitHub UI: **Pull request title**). The existing PR-title check validates the
 default final subject. Do not copy the PR description into the commit: Markdown,
