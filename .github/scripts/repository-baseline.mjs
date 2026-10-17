@@ -560,6 +560,143 @@ async function synchronizeSettings(
   return effectiveDefaultBranch;
 }
 
+async function synchronizeEnvironments(
+  api,
+  owner,
+  repository,
+  declarations = [],
+) {
+  if (!Array.isArray(declarations))
+    throw new Error('managedEnvironments must be an array');
+  const changes = [];
+  const names = new Set();
+  for (const declaration of declarations) {
+    if (
+      !declaration ||
+      typeof declaration !== 'object' ||
+      Array.isArray(declaration) ||
+      Object.keys(declaration).some(
+        (key) =>
+          !['name', 'repositories', 'reviewers', 'preventSelfReview'].includes(
+            key,
+          ),
+      )
+    ) {
+      throw new Error('Unknown or invalid managed environment policy field');
+    }
+    if (
+      !Array.isArray(declaration.repositories) ||
+      declaration.repositories.length < 1 ||
+      !declaration.repositories.every(
+        (name) => typeof name === 'string' && /^[A-Za-z0-9_.-]+$/.test(name),
+      )
+    ) {
+      throw new Error(
+        'Environment eligibility must list exact repository names',
+      );
+    }
+    if (!declaration.repositories.includes(repository)) continue;
+    if (
+      typeof declaration.name !== 'string' ||
+      !declaration.name.trim().length ||
+      declaration.name.length > 255 ||
+      /[\u0000-\u001f]/.test(declaration.name)
+    ) {
+      throw new Error('Invalid managed environment name');
+    }
+    const key = declaration.name.toLowerCase();
+    if (names.has(key))
+      throw new Error('Duplicate managed environment declaration');
+    names.add(key);
+    if (
+      typeof declaration.preventSelfReview !== 'boolean' ||
+      !Array.isArray(declaration.reviewers) ||
+      declaration.reviewers.length < 1 ||
+      declaration.reviewers.length > 6
+    ) {
+      throw new Error(
+        'Protected environments require an explicit review policy',
+      );
+    }
+    const reviewers = [];
+    for (const reviewer of declaration.reviewers) {
+      if (
+        !reviewer ||
+        typeof reviewer !== 'object' ||
+        Array.isArray(reviewer) ||
+        Object.keys(reviewer).some(
+          (key) => !['type', 'id', 'login'].includes(key),
+        )
+      ) {
+        throw new Error('Unknown or invalid environment reviewer field');
+      }
+      if (
+        reviewer.type !== 'User' ||
+        !Number.isSafeInteger(reviewer.id) ||
+        reviewer.id < 1 ||
+        typeof reviewer.login !== 'string' ||
+        !/^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(reviewer.login)
+      ) {
+        throw new Error(
+          'Environment reviewers require a declared user login and immutable ID',
+        );
+      }
+      const identity = await api.request(
+        `/users/${encodeURIComponent(reviewer.login)}`,
+      );
+      if (identity.id !== reviewer.id)
+        throw new Error(
+          `Environment reviewer identity changed: ${reviewer.login}`,
+        );
+      if (reviewers.some((current) => current.id === reviewer.id))
+        throw new Error('Duplicate environment reviewer');
+      reviewers.push({ type: 'User', id: reviewer.id });
+    }
+    reviewers.sort((left, right) => left.id - right.id);
+    const path = `/repos/${owner}/${repository}/environments/${encodeURIComponent(declaration.name)}`;
+    const current = await api.request(path, { allowNotFound: true });
+    const rules = current?.protection_rules ?? [];
+    const reviewRule = rules.find((rule) => rule.type === 'required_reviewers');
+    const heldReviewers = (reviewRule?.reviewers ?? [])
+      .map((entry) => ({ type: entry.type, id: entry.reviewer.id }))
+      .sort((left, right) => left.id - right.id);
+    if (
+      current &&
+      JSON.stringify(heldReviewers) === JSON.stringify(reviewers) &&
+      Boolean(reviewRule?.prevent_self_review) === declaration.preventSelfReview
+    )
+      continue;
+    if (
+      rules.some(
+        (rule) =>
+          !['required_reviewers', 'wait_timer', 'branch_policy'].includes(
+            rule.type,
+          ),
+      )
+    ) {
+      throw new Error(
+        `Unsupported protection rule in managed environment ${declaration.name}; existing policy preserved`,
+      );
+    }
+    changes.push({
+      path,
+      name: declaration.name,
+      body: {
+        reviewers,
+        prevent_self_review: declaration.preventSelfReview,
+        wait_timer:
+          rules.find((rule) => rule.type === 'wait_timer')?.wait_timer ?? 0,
+        deployment_branch_policy: current?.deployment_branch_policy ?? null,
+      },
+    });
+  }
+  // Resolve and validate every eligible identity before making environment writes.
+  for (const change of changes) {
+    console.log(`  environment reviewer policy differs: ${change.name}`);
+    await api.mutate(change.path, { method: 'PUT', body: change.body });
+  }
+}
+
 async function loadDetailedRulesets(api, owner, repository) {
   const summaries = await api.paginate(
     `/repos/${owner}/${repository}/rulesets`,
@@ -994,6 +1131,10 @@ async function main() {
         repository.name,
         currentRepository,
         desiredSettings,
+      );
+
+      await synchronizeEnvironments(
+        api, owner, repository.name, config.managedEnvironments,
       );
 
       if (
