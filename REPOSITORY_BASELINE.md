@@ -12,7 +12,8 @@ The baseline synchronizer manages these shared configuration categories:
 - labels declared in [`.github/labels.json`](.github/labels.json);
 - merge settings declared in `repositorySettings` in the baseline manifest;
 - repository rulesets whose names start with `baseline:`;
-- repository autolinks in the prefixes reserved by the baseline manifest.
+- repository autolinks in the prefixes reserved by the baseline manifest;
+- required-reviewer policies for explicitly declared eligible environments.
 
 Files outside the managed path list are not copied, changed, or deleted. A
 repository can therefore add its own Issue Forms, workflows, labels, and
@@ -54,6 +55,38 @@ The synchronizer commits a clean merge directly to the default branch. If both
 the common file and its repository copy contain conflicting edits, it creates
 or updates `automation/repository-baseline` and opens a pull request for manual
 resolution.
+
+## Protected CI review environments
+
+`managedEnvironments` declares exact repository eligibility, an environment name,
+required user reviewers and an explicit `preventSelfReview` policy. The baseline
+resolves each declared login and verifies its immutable GitHub user ID before
+writing. A reused login cannot silently become a new authorized reviewer. Only
+`User` reviewers are supported by this initial adapter.
+
+The initial declaration targets `payloadbay/alpha-ci-external` only, with
+`TheDanniCraft` as its required reviewer. Self-review is permitted for this
+single-maintainer setup: the named maintainer can approve a build they initiated;
+an outside contributor is not an authorized reviewer. Trusted source builds use
+the automatic `alpha-ci` environment declared by the project workflow.
+
+The synchronizer manages the declared reviewer list and self-review flag. It
+round-trips existing wait timers and deployment branch mode, leaves other
+environments untouched, and never calls secret, branch-pattern or custom
+protection-rule mutation endpoints. Unsupported protection rules cause a refusal
+to mutate rather than being discarded. Removing a declaration stops management;
+it does not delete an environment, its history or its secrets.
+
+The existing baseline App's Administration write permission covers the GitHub
+[environment configuration API](https://docs.github.com/en/rest/deployments/environments#create-or-update-an-environment).
+Required reviewers are available for the public Payload Bay repository. Dry runs
+inspect and report drift through the same path without applying it.
+
+Project CI must check this protection exists before checking out external source,
+then depend on a native environment approval job before running code with licensed
+build credentials. An environment name alone is insufficient: GitHub can create
+an unprotected environment automatically. Credentials remain encrypted Actions
+secrets and are not part of this manifest or synchronization.
 
 ## Planned work and Linear
 
