@@ -91,7 +91,7 @@ We **love** pull requests! Before [forking a repository](https://docs.github.com
 - **Review your own diff.** Remove debug output, generated noise, unrelated changes, secrets, and accidental formatting changes before requesting review.
 - When writing comments, use complete and respectful sentences, including enough context for someone reading them later.
 
-Payload Bay uses **squash merging** by default. The pull-request title becomes the final commit subject, so the title must follow the same Conventional Commit format as commit messages.
+Payload Bay uses **squash merging** by default. The pull-request title becomes the final commit subject, so the title must follow the same Conventional Commit format as commit messages. The default squash body is empty; the PR description stays on the pull request and is not copied into Git history. Maintainers overriding the merge message must validate the exact replacement with commitlint before merging.
 
 Keep the title focused on the outcome:
 

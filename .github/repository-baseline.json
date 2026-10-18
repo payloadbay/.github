@@ -6,7 +6,9 @@
   "rulesetPrefix": "baseline:",
   "statePath": ".github/.payloadbay-baseline.json",
   "syncBranch": "automation/repository-baseline",
-  "managedAutolinkPrefixes": ["PAB-"],
+  "managedAutolinkPrefixes": [
+    "PAB-"
+  ],
   "autolinks": [
     {
       "keyPrefix": "PAB-",
@@ -32,7 +34,9 @@
   "managedFileGroups": [
     {
       "name": "speckit",
-      "repositories": ["payloadbay"],
+      "repositories": [
+        "payloadbay"
+      ],
       "files": [
         ".github/speckit/README.md",
         ".github/speckit/setup.json",
@@ -71,5 +75,16 @@
       ".github/renovate.json5",
       "package.json"
     ]
+  },
+  "repositorySettings": {
+    "default_branch": "master",
+    "allow_squash_merge": true,
+    "allow_merge_commit": false,
+    "allow_rebase_merge": false,
+    "allow_auto_merge": true,
+    "delete_branch_on_merge": true,
+    "allow_update_branch": true,
+    "squash_merge_commit_title": "PR_TITLE",
+    "squash_merge_commit_message": "BLANK"
   }
 }

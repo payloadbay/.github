@@ -137,17 +137,17 @@ export function planAutolinkChanges(
   return { create, replace, remove, unmanaged };
 }
 
-export function portableRepositorySettings(sourceRepository) {
+export function portableRepositorySettings(declaredSettings) {
   return {
-    default_branch: sourceRepository.default_branch,
-    allow_squash_merge: sourceRepository.allow_squash_merge,
-    allow_merge_commit: sourceRepository.allow_merge_commit,
-    allow_rebase_merge: sourceRepository.allow_rebase_merge,
-    allow_auto_merge: sourceRepository.allow_auto_merge,
-    delete_branch_on_merge: sourceRepository.delete_branch_on_merge,
-    allow_update_branch: sourceRepository.allow_update_branch,
-    squash_merge_commit_title: sourceRepository.squash_merge_commit_title,
-    squash_merge_commit_message: sourceRepository.squash_merge_commit_message,
+    default_branch: declaredSettings.default_branch,
+    allow_squash_merge: declaredSettings.allow_squash_merge,
+    allow_merge_commit: declaredSettings.allow_merge_commit,
+    allow_rebase_merge: declaredSettings.allow_rebase_merge,
+    allow_auto_merge: declaredSettings.allow_auto_merge,
+    delete_branch_on_merge: declaredSettings.delete_branch_on_merge,
+    allow_update_branch: declaredSettings.allow_update_branch,
+    squash_merge_commit_title: declaredSettings.squash_merge_commit_title,
+    squash_merge_commit_message: declaredSettings.squash_merge_commit_message,
   };
 }
 
@@ -943,14 +943,14 @@ async function main() {
   const api = new GitHubApi(token, arguments_.dryRun);
   const owner = config.organization;
   const sourceRepositoryName = config.sourceRepository;
-  const sourceRepository = await api.request(
-    `/repos/${owner}/${sourceRepositoryName}`,
-  );
   const organization = await api.request(`/orgs/${owner}`);
   const sourceCommit = (
     await getRef(api, owner, sourceRepositoryName, config.sourceBranch)
   ).object.sha;
-  const desiredSettings = portableRepositorySettings(sourceRepository);
+  if (!config.repositorySettings) {
+    throw new Error("Baseline manifest must declare repositorySettings");
+  }
+  const desiredSettings = portableRepositorySettings(config.repositorySettings);
   const sourceRulesets = await loadDetailedRulesets(
     api,
     owner,
