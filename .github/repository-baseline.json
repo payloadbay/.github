@@ -86,5 +86,21 @@
     "allow_update_branch": true,
     "squash_merge_commit_title": "PR_TITLE",
     "squash_merge_commit_message": "BLANK"
-  }
+  },
+  "managedEnvironments": [
+    {
+      "name": "alpha-ci-external",
+      "repositories": [
+        "payloadbay"
+      ],
+      "preventSelfReview": false,
+      "reviewers": [
+        {
+          "type": "User",
+          "login": "TheDanniCraft",
+          "id": 66677362
+        }
+      ]
+    }
+  ]
 }
