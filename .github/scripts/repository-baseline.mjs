@@ -157,8 +157,22 @@ export function repositorySettingsDiffer(currentRepository, desiredSettings) {
   );
 }
 
+export function deployKeyBypassAllowed(config, repository) {
+  const repositories = config.deployKeyBypassRepositories ?? [];
+  if (
+    !Array.isArray(repositories) ||
+    repositories.some((name) =>
+      typeof name !== "string" || !/^[A-Za-z0-9_.-]+$/.test(name)
+    )
+  ) {
+    throw new Error("deployKeyBypassRepositories must contain repository names");
+  }
+
+  return repositories.includes(repository);
+}
+
 export function normalizeRuleset(ruleset, options = {}) {
-  const { appId, injectAppBypass = false } = options;
+  const { appId, injectAppBypass = false, allowDeployKeyBypass = false } = options;
   const bypassActors = (ruleset.bypass_actors ?? [])
     .filter(
       (actor) =>
@@ -172,6 +186,17 @@ export function normalizeRuleset(ruleset, options = {}) {
       actor_type: actor.actor_type,
       bypass_mode: actor.bypass_mode,
     }));
+
+  if (
+    allowDeployKeyBypass &&
+    !bypassActors.some((actor) => actor.actor_type === "DeployKey")
+  ) {
+    bypassActors.push({
+      actor_id: null,
+      actor_type: "DeployKey",
+      bypass_mode: "always",
+    });
+  }
 
   if (injectAppBypass) {
     if (!appId) {
@@ -715,6 +740,7 @@ async function synchronizeRulesets({
   sourceRulesets,
   prefix,
   appId,
+  allowDeployKeyBypass = false,
 }) {
   const targetRulesets = await loadDetailedRulesets(api, owner, repository);
   const plan = planRulesetChanges(sourceRulesets, targetRulesets, prefix);
@@ -727,6 +753,7 @@ async function synchronizeRulesets({
     const desired = normalizeRuleset(sourceRuleset, {
       appId,
       injectAppBypass: true,
+      allowDeployKeyBypass,
     });
     if (targetRuleset) {
       const current = normalizeRuleset(targetRuleset, {
@@ -1077,6 +1104,7 @@ async function main() {
     readFile(baselineConfigPath, "utf8").then(JSON.parse),
     readFile(labelsPath, "utf8").then(JSON.parse),
   ]);
+  deployKeyBypassAllowed(config, config.sourceRepository);
   const api = new GitHubApi(token, arguments_.dryRun);
   const owner = config.organization;
   const sourceRepositoryName = config.sourceRepository;
@@ -1148,6 +1176,7 @@ async function main() {
           sourceRulesets,
           prefix: config.rulesetPrefix,
           appId: process.env.BASELINE_APP_ID,
+          allowDeployKeyBypass: deployKeyBypassAllowed(config, repository.name),
         });
       } else if (
         repository.name !== sourceRepositoryName &&

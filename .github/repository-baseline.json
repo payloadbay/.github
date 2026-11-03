@@ -56,7 +56,9 @@
     },
     {
       "name": "typescript",
-      "repositories": ["payloadbay"],
+      "repositories": [
+        "payloadbay"
+      ],
       "files": [
         ".github/tooling/README.md",
         ".github/tooling/eslint/base.mjs",
@@ -102,5 +104,8 @@
         }
       ]
     }
+  ],
+  "deployKeyBypassRepositories": [
+    "payloadbay"
   ]
 }

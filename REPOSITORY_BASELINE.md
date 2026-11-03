@@ -201,6 +201,15 @@ ruleset is `baseline:default-branch`. Rulesets with that prefix are created,
 updated, and removed in target repositories to match `.github`. Other rulesets
 remain local.
 
+The manifest's optional `deployKeyBypassRepositories` allowlist adds a DeployKey
+bypass only to those exact target repository names. It currently lists only
+`payloadbay`, whose master-only migration workflow pushes generated SQL with one
+dedicated write key. GitHub applies this actor type to every deploy key in that
+repository, not an individual key ID; do not add unrelated write keys. Other
+repositories and the `.github` source ruleset retain their original bypasses.
+Remove the name from this allowlist to revoke the exception during reconciliation.
+The organization-wide permission to create deploy keys is a separate owner setting.
+
 The synchronization App is added as a bypass actor only in target
 repositories. It does not bypass the rules protecting the `.github` source
 repository.

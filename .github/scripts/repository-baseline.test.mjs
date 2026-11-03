@@ -12,6 +12,7 @@ import {
   hashContent,
   mergeManagedFile,
   normalizeRuleset,
+  deployKeyBypassAllowed,
   planAutolinkChanges,
   planFileSynchronization,
   planLabelChanges,
@@ -742,4 +743,28 @@ test('unknown environment policy fields cannot be silently ignored', async () =>
     result.calls.some((call) => call.method !== 'GET'),
     false,
   );
+});
+
+
+test("migration deploy-key bypass is explicit per repository and survives reconciliation", () => {
+  const config = { deployKeyBypassRepositories: ["payloadbay"] };
+  const source = { name: "baseline:default-branch", bypass_actors: [{ actor_type: "OrganizationAdmin", actor_id: null, bypass_mode: "always" }], rules: [{ type: "pull_request" }] };
+  for (const repository of ["payloadbay", "website", "brand", "payloadbay-fork"]) {
+    const desired = normalizeRuleset(source, { appId: 42, injectAppBypass: true, allowDeployKeyBypass: deployKeyBypassAllowed(config, repository) });
+    assert.equal(desired.bypass_actors.some((actor) => actor.actor_type === "DeployKey"), repository === "payloadbay");
+    assert.deepEqual(desired.rules, source.rules);
+    assert.equal(desired.bypass_actors.filter((actor) => actor.actor_type === "Integration").length, 1);
+    assert.deepEqual(normalizeRuleset(desired, { appId: 42, injectAppBypass: true }), desired);
+    const revoked = normalizeRuleset(source, { appId: 42, injectAppBypass: true });
+    assert.equal(revoked.bypass_actors.some((actor) => actor.actor_type === "DeployKey"), false);
+    if (repository === "payloadbay") assert.notDeepEqual(revoked, desired);
+  }
+  assert.equal(deployKeyBypassAllowed({}, "payloadbay"), false);
+  assert.equal(source.bypass_actors.length, 1, "normalization must not modify the shared source rule");
+});
+
+test("invalid deploy-key bypass configuration is rejected before writes", () => {
+  for (const value of ["payloadbay", [null], [""], ["../payloadbay"], [42]]) {
+    assert.throws(() => deployKeyBypassAllowed({ deployKeyBypassRepositories: value }, "payloadbay"), /repository names/);
+  }
 });
